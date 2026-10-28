@@ -1,0 +1,851 @@
+{
+  "match_id": "golden-game-01",
+  "source": "recorded-match.mp4",
+  "mode": "MSN_CHAOS",
+  "players": [
+    {
+      "id": "p1",
+      "name": "Aur\u00e9lien",
+      "avatar": "green_pawn",
+      "color": "#10B981"
+    },
+    {
+      "id": "p2",
+      "name": "R\u00e9gis",
+      "avatar": "red_pawn",
+      "color": "#EF4444"
+    }
+  ],
+  "high_card_draw": {
+    "p1_card": {
+      "rank": "5",
+      "suit": "D"
+    },
+    "p2_card": {
+      "rank": "Q",
+      "suit": "S"
+    },
+    "winner": "p2",
+    "reason": "Queen ranks higher than 5"
+  },
+  "initial_pool": [
+    {
+      "rank": "K",
+      "suit": "S"
+    },
+    {
+      "rank": "4",
+      "suit": "S"
+    },
+    {
+      "type": "JOKER"
+    },
+    {
+      "rank": "8",
+      "suit": "D"
+    },
+    {
+      "rank": "9",
+      "suit": "S"
+    }
+  ],
+  "turns": [
+    {
+      "turn_index": 1,
+      "player_id": "p2",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 0,
+      "card": {
+        "rank": "2",
+        "suit": "S"
+      },
+      "destination": {
+        "row": 2,
+        "col": 0
+      },
+      "refill": {
+        "slot": 0,
+        "card": {
+          "rank": "3",
+          "suit": "H"
+        }
+      },
+      "hands_formed": [],
+      "score_delta": 0,
+      "running_scores": {
+        "p1": 0,
+        "p2": 0
+      }
+    },
+    {
+      "turn_index": 2,
+      "player_id": "p1",
+      "action": "JOKER_SELECT",
+      "pool_slot": 2,
+      "assigned_card": {
+        "rank": "A",
+        "suit": "S",
+        "is_joker": true
+      },
+      "destination": {
+        "row": 2,
+        "col": 1
+      },
+      "refill": {
+        "slot": 2,
+        "card": {
+          "rank": "8",
+          "suit": "C"
+        }
+      },
+      "hands_formed": [],
+      "score_delta": 0,
+      "running_scores": {
+        "p1": 0,
+        "p2": 0
+      }
+    },
+    {
+      "turn_index": 3,
+      "player_id": "p2",
+      "action": "ROBBER_STEAL",
+      "pool_slot": 1,
+      "stolen_from": {
+        "player_id": "p1",
+        "row": 2,
+        "col": 1
+      },
+      "stolen_card": {
+        "rank": "A",
+        "suit": "S",
+        "is_joker": true
+      },
+      "destination": {
+        "row": 1,
+        "col": 1
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "rank": "7",
+          "suit": "C"
+        }
+      },
+      "hands_formed": [],
+      "score_delta": 0,
+      "running_scores": {
+        "p1": 0,
+        "p2": 0
+      },
+      "victim_compensation": {
+        "player_id": "p1",
+        "extra_cards": 1
+      }
+    },
+    {
+      "turn_index": 4,
+      "sub_turn": "a",
+      "player_id": "p1",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 4,
+      "card": {
+        "rank": "8",
+        "suit": "S"
+      },
+      "destination": {
+        "row": 0,
+        "col": 0
+      },
+      "refill": {
+        "slot": 4,
+        "card": {
+          "rank": "9",
+          "suit": "D"
+        }
+      },
+      "hands_formed": [],
+      "score_delta": 0,
+      "running_scores": {
+        "p1": 0,
+        "p2": 0
+      }
+    },
+    {
+      "turn_index": 4,
+      "sub_turn": "b",
+      "player_id": "p1",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 4,
+      "card": {
+        "rank": "9",
+        "suit": "D"
+      },
+      "destination": {
+        "row": 0,
+        "col": 1
+      },
+      "refill": {
+        "slot": 4,
+        "card": {
+          "rank": "8",
+          "suit": "S"
+        }
+      },
+      "hands_formed": [],
+      "score_delta": 0,
+      "running_scores": {
+        "p1": 0,
+        "p2": 0
+      }
+    },
+    {
+      "turn_index": 5,
+      "player_id": "p2",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 2,
+      "card": {
+        "rank": "A",
+        "suit": "C"
+      },
+      "destination": {
+        "row": 1,
+        "col": 0
+      },
+      "refill": {
+        "slot": 2,
+        "card": {
+          "rank": "10",
+          "suit": "C"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "row_1",
+          "type": "PAIR",
+          "points": 250
+        }
+      ],
+      "score_delta": 250,
+      "running_scores": {
+        "p1": 0,
+        "p2": 250
+      }
+    },
+    {
+      "turn_index": 6,
+      "player_id": "p1",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 2,
+      "card": {
+        "rank": "10",
+        "suit": "C"
+      },
+      "destination": {
+        "row": 0,
+        "col": 2
+      },
+      "refill": {
+        "slot": 2,
+        "card": {
+          "rank": "3",
+          "suit": "H"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "row_0",
+          "type": "STRAIGHT",
+          "cards": [
+            "8S",
+            "9D",
+            "10C"
+          ],
+          "points": 700
+        }
+      ],
+      "score_delta": 700,
+      "running_scores": {
+        "p1": 700,
+        "p2": 250
+      }
+    },
+    {
+      "turn_index": 7,
+      "player_id": "p2",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 0,
+      "card": {
+        "rank": "3",
+        "suit": "H"
+      },
+      "destination": {
+        "row": 0,
+        "col": 0
+      },
+      "refill": {
+        "slot": 0,
+        "card": {
+          "type": "JOKER"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "col_0",
+          "type": "STRAIGHT",
+          "cards": [
+            "3H",
+            "AC",
+            "2S"
+          ],
+          "points": 700
+        }
+      ],
+      "score_delta": 700,
+      "running_scores": {
+        "p1": 700,
+        "p2": 950
+      }
+    },
+    {
+      "turn_index": 8,
+      "player_id": "p1",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 1,
+      "card": {
+        "rank": "7",
+        "suit": "C"
+      },
+      "destination": {
+        "row": 1,
+        "col": 0
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "rank": "8",
+          "suit": "C"
+        }
+      },
+      "hands_formed": [],
+      "score_delta": 0,
+      "running_scores": {
+        "p1": 700,
+        "p2": 950
+      }
+    },
+    {
+      "turn_index": 9,
+      "player_id": "p2",
+      "action": "JOKER_SELECT",
+      "pool_slot": 0,
+      "assigned_card": {
+        "rank": "3",
+        "suit": "S",
+        "is_joker": true
+      },
+      "destination": {
+        "row": 0,
+        "col": 2
+      },
+      "refill": {
+        "slot": 0,
+        "card": {
+          "rank": "K",
+          "suit": "H"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "row_0",
+          "type": "PAIR",
+          "cards": [
+            "3H",
+            "3S"
+          ],
+          "points": 250
+        }
+      ],
+      "score_delta": 250,
+      "running_scores": {
+        "p1": 700,
+        "p2": 1200
+      }
+    },
+    {
+      "turn_index": 10,
+      "player_id": "p1",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 1,
+      "card": {
+        "rank": "8",
+        "suit": "C"
+      },
+      "destination": {
+        "row": 1,
+        "col": 1
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "rank": "9",
+          "suit": "S"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "diag_0",
+          "type": "PAIR",
+          "cards": [
+            "8S",
+            "8C"
+          ],
+          "points": 250
+        }
+      ],
+      "score_delta": 250,
+      "running_scores": {
+        "p1": 950,
+        "p2": 1200
+      }
+    },
+    {
+      "turn_index": 11,
+      "player_id": "p2",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 0,
+      "card": {
+        "rank": "K",
+        "suit": "H"
+      },
+      "destination": {
+        "row": 2,
+        "col": 1
+      },
+      "refill": {
+        "slot": 0,
+        "card": {
+          "rank": "K",
+          "suit": "C"
+        }
+      },
+      "hands_formed": [],
+      "score_delta": 0,
+      "running_scores": {
+        "p1": 950,
+        "p2": 1200
+      }
+    },
+    {
+      "turn_index": 12,
+      "player_id": "p1",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 1,
+      "card": {
+        "rank": "9",
+        "suit": "S"
+      },
+      "destination": {
+        "row": 2,
+        "col": 0
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "type": "ROBBER"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "col_0",
+          "type": "STRAIGHT",
+          "cards": [
+            "8S",
+            "7C",
+            "9S"
+          ],
+          "points": 700
+        },
+        {
+          "line": "diag_1",
+          "type": "STRAIGHT",
+          "cards": [
+            "10C",
+            "8C",
+            "9S"
+          ],
+          "points": 700
+        }
+      ],
+      "score_delta": 1400,
+      "running_scores": {
+        "p1": 2350,
+        "p2": 1200
+      }
+    },
+    {
+      "turn_index": 13,
+      "player_id": "p2",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 0,
+      "card": {
+        "rank": "K",
+        "suit": "C"
+      },
+      "destination": {
+        "row": 2,
+        "col": 2
+      },
+      "refill": {
+        "slot": 0,
+        "card": {
+          "rank": "2",
+          "suit": "C"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "row_2",
+          "type": "PAIR",
+          "cards": [
+            "KH",
+            "KC"
+          ],
+          "points": 250
+        },
+        {
+          "line": "diag_1",
+          "type": "STRAIGHT_FLUSH",
+          "cards": [
+            "3S",
+            "AS",
+            "2S"
+          ],
+          "points": 1500
+        }
+      ],
+      "score_delta": 1750,
+      "running_scores": {
+        "p1": 2350,
+        "p2": 2950
+      }
+    },
+    {
+      "turn_index": 14,
+      "player_id": "p1",
+      "action": "ROBBER_STEAL",
+      "pool_slot": 1,
+      "stolen_from": {
+        "player_id": "p2",
+        "row": 1,
+        "col": 1
+      },
+      "stolen_card": {
+        "rank": "A",
+        "suit": "S",
+        "is_joker": true
+      },
+      "destination": {
+        "row": 2,
+        "col": 1
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "rank": "3",
+          "suit": "S"
+        }
+      },
+      "victim_score_loss": [
+        {
+          "line": "row_1",
+          "lost_type": "PAIR",
+          "points": -250
+        },
+        {
+          "line": "diag_1",
+          "lost_type": "STRAIGHT_FLUSH",
+          "points": -1500
+        }
+      ],
+      "score_delta": 0,
+      "running_scores": {
+        "p1": 2350,
+        "p2": 1200
+      },
+      "victim_compensation": {
+        "player_id": "p2",
+        "extra_cards": 1
+      }
+    },
+    {
+      "turn_index": 15,
+      "sub_turn": "a",
+      "player_id": "p2",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 1,
+      "card": {
+        "rank": "3",
+        "suit": "S"
+      },
+      "destination": {
+        "row": 0,
+        "col": 1
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "rank": "Q",
+          "suit": "S"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "row_0",
+          "type": "THREE_OF_A_KIND",
+          "cards": [
+            "3H",
+            "3S",
+            "3S"
+          ],
+          "points": 1000,
+          "upgraded_from": "PAIR",
+          "net_gain": 750
+        }
+      ],
+      "score_delta": 750,
+      "running_scores": {
+        "p1": 2350,
+        "p2": 1950
+      }
+    },
+    {
+      "turn_index": 15,
+      "sub_turn": "b",
+      "player_id": "p2",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 1,
+      "card": {
+        "rank": "Q",
+        "suit": "S"
+      },
+      "destination": {
+        "row": 1,
+        "col": 2
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "rank": "J",
+          "suit": "S"
+        }
+      },
+      "hands_formed": [],
+      "score_delta": 0,
+      "running_scores": {
+        "p1": 2350,
+        "p2": 1950
+      }
+    },
+    {
+      "turn_index": 16,
+      "player_id": "p1",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 1,
+      "card": {
+        "rank": "J",
+        "suit": "S"
+      },
+      "destination": {
+        "row": 2,
+        "col": 2
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "type": "ROBBER"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "row_2",
+          "type": "FLUSH",
+          "cards": [
+            "9S",
+            "AS",
+            "JS"
+          ],
+          "points": 400
+        }
+      ],
+      "score_delta": 400,
+      "running_scores": {
+        "p1": 2750,
+        "p2": 1950
+      }
+    },
+    {
+      "turn_index": 17,
+      "player_id": "p2",
+      "action": "ROBBER_STEAL",
+      "pool_slot": 1,
+      "stolen_from": {
+        "player_id": "p1",
+        "row": 2,
+        "col": 1
+      },
+      "stolen_card": {
+        "rank": "A",
+        "suit": "S",
+        "is_joker": true
+      },
+      "destination": {
+        "row": 1,
+        "col": 1
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "type": "JOKER"
+        }
+      },
+      "victim_score_loss": [
+        {
+          "line": "row_2",
+          "lost_type": "FLUSH",
+          "points": -400
+        }
+      ],
+      "hands_formed": [
+        {
+          "line": "row_1",
+          "type": "PAIR",
+          "cards": [
+            "AC",
+            "AS"
+          ],
+          "points": 250
+        },
+        {
+          "line": "diag_1",
+          "type": "STRAIGHT_FLUSH",
+          "cards": [
+            "3S",
+            "AS",
+            "2S"
+          ],
+          "points": 1500
+        }
+      ],
+      "score_delta": 1750,
+      "running_scores": {
+        "p1": 2350,
+        "p2": 3700
+      },
+      "victim_compensation": {
+        "player_id": "p1",
+        "extra_cards": 1
+      }
+    },
+    {
+      "turn_index": 18,
+      "sub_turn": "a",
+      "player_id": "p1",
+      "action": "JOKER_SELECT",
+      "pool_slot": 1,
+      "assigned_card": {
+        "rank": "9",
+        "suit": "C",
+        "is_joker": true
+      },
+      "destination": {
+        "row": 1,
+        "col": 2
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "rank": "K",
+          "suit": "S"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "row_1",
+          "type": "STRAIGHT_FLUSH",
+          "cards": [
+            "7C",
+            "8C",
+            "9C"
+          ],
+          "points": 1500
+        },
+        {
+          "line": "col_2",
+          "type": "STRAIGHT",
+          "cards": [
+            "10C",
+            "9C",
+            "JS"
+          ],
+          "points": 700
+        }
+      ],
+      "score_delta": 2200,
+      "running_scores": {
+        "p1": 4550,
+        "p2": 3700
+      }
+    },
+    {
+      "turn_index": 18,
+      "sub_turn": "b",
+      "player_id": "p1",
+      "action": "DRAFT_AND_PLACE",
+      "pool_slot": 1,
+      "card": {
+        "rank": "K",
+        "suit": "S"
+      },
+      "destination": {
+        "row": 2,
+        "col": 1
+      },
+      "refill": {
+        "slot": 1,
+        "card": {
+          "rank": "7",
+          "suit": "H"
+        }
+      },
+      "hands_formed": [
+        {
+          "line": "row_2",
+          "type": "FLUSH",
+          "cards": [
+            "9S",
+            "KS",
+            "JS"
+          ],
+          "points": 400
+        }
+      ],
+      "score_delta": 400,
+      "running_scores": {
+        "p1": 4950,
+        "p2": 3700
+      }
+    }
+  ],
+  "end_state": {
+    "winner_id": "p1",
+    "final_scores": {
+      "p1": 4950,
+      "p2": 3700
+    },
+    "completed_hands_count": {
+      "p1": 7,
+      "p2": 5
+    },
+    "grids_full": true
+  }
+}
