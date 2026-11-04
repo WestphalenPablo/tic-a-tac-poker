@@ -1,0 +1,35 @@
+# Changelog
+
+Changes to `packages/client` since the original implementation (click-to-select UI, three-column layout). `packages/game` and the rules are unchanged.
+
+## Drag and drop (mouse)
+
+- `CardView` takes an optional `drag` prop (`onDragStart` / `onDrop` / `onDragEnd`) and uses native HTML5 drag and drop.
+- Pool cards are draggable on your turn. Dropping on an empty cell of your board plays the card (a Joker opens the picker as before).
+- Robber: drag it onto a filled bot card to choose what to steal, then drag that card onto an empty cell of your board. Bot cards are only draggable while a Robber is selected.
+- Every grid cell is a drop target; invalid drops are ignored by the same guards the click flow uses.
+- The click-to-select flow is unchanged and remains the only path on touch devices (native HTML5 DnD has no touch support).
+
+## Controller support (Gamepad API)
+
+- New `useGamepad` hook (`src/useGamepad.ts`) polls connected pads once per animation frame and emits `up/down/left/right/a/b`. Standard mapping: A=0, B=1, d-pad=12-15, left stick with a 0.6 deadzone. Directions repeat while held (350 ms delay, then 130 ms); A/B fire once per press.
+- A cursor (magenta outline) moves across your board, the pool column and the bot's board. A selects/places, B cancels the current selection. The cursor appears only after pad input and hides on pointer use.
+- Joker picker: left/right = rank, up/down = suit, A = confirm, B = cancel.
+- Game-over dialog: A starts a new game.
+- The bot's grid is reachable only while choosing which card to rob (Robber selected, no target chosen yet). Otherwise the cursor cannot enter it. If the cursor is on the bot's grid when that stops being true, it moves to your first empty cell (after a target is picked) or to the first pool slot (on cancel or end of turn).
+
+## Responsive layout
+
+- Phone (< 640px): compact cards and tighter padding; pool as a row on top, the two boards side by side below; smaller header controls and status text.
+- Tablet (640-767px): same stacked layout with full-size cards.
+- Desktop (>= 768px): the original three-column layout (your board, vertical pool, bot board) with original card sizes.
+- Dialogs (Joker picker, game over) use `w-[90vw] max-w-sm` instead of a fixed width so they fit narrow screens.
+
+## Files touched
+
+- Added: `packages/client/src/useGamepad.ts`
+- Modified: `packages/client/src/App.tsx`, `CardView.tsx`, `JokerPicker.tsx`
+
+## Not verified
+
+Drag and drop, controller input and the breakpoints were checked with `pnpm typecheck` and `pnpm build` only, not in a browser or with a physical controller.
