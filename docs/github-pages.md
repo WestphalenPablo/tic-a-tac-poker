@@ -16,6 +16,6 @@
 
 **Verified:** `pnpm typecheck`, `pnpm test` (15/15), `pnpm build`; built `index.html` and the JS bundle reference `/tic-a-tac-poker/...`.
 
-**Verified in CI:** the run on `a4dfaf3` succeeded and the site answers 200.
+**Verified in CI:** the run on `fcedacc` (bumped actions) succeeded with no warnings or annotations, and the site answers 200.
 
-**Not verified:** the bumped action versions have not run yet; audio playback and animations on the deployed site, audio playback and animations under the sub-path have not been loaded in a browser.
+**Not verified:** audio playback and animations on the deployed site, audio playback and animations under the sub-path have not been loaded in a browser.
