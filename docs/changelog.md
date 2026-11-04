@@ -27,7 +27,7 @@ Changes to `packages/client` since the original implementation (click-to-select 
 
 ## Opening draw ritual
 
-- New `FirstDraw` overlay plays at the start of every game (about 8 s, +3 s per tie), with synthesized flip/win/tie sounds from `src/sfx.ts`. Input and the bot wait for it. Details and status: [first-draw.md](first-draw.md).
+- New `FirstDraw` overlay plays at the start of every game (about 5 s, +2 s per tie), with synthesized flip/win/tie sounds from `src/sfx.ts`. Input and the bot wait for it. Details and status: [first-draw.md](first-draw.md).
 
 ## Files touched
 

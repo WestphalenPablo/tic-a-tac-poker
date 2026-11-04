@@ -13,10 +13,10 @@ The original footage (`legacy/research/frame-log.md`, frames 004-006) shows a ba
 | Tie redraws | Keep the full history; show every redraw | Ties are rare but visible; the engine stays pure (injected `Rng`) so history is cheap to test |
 | Tiebreak | Rank only, never suit; redraw on equal rank | Matches footage and README; no invented suit order |
 | Reveal | Sequential: player card, then bot card, then highlight winner | A little suspense, easy to pair with per-card sound |
-| Timing | Fixed, no skip; only on the first draw of a new game. Originally ~3s, now 8s (see Step 4) | It is flavour; the original had no skip |
+| Timing | Fixed, no skip; only on the first draw of a new game. Tried 3s (too quick) and 8s (too slow), now 5s (see Step 4) | It is flavour; the original had no skip |
 | Audio | Sound effects only (card flip), no voice | No new EN/PT recordings needed |
 
-Open points: each extra redraw round adds 3s (scaled with the 8s stretch); the ritual holds input and the bot with its own timer, since no voice clip is involved; whether a flip sound already exists in the client is unchecked.
+Open points: each extra redraw round adds 2s (scaled with the 5s total); the ritual holds input and the bot with its own timer, since no voice clip is involved; whether a flip sound already exists in the client is unchecked.
 
 ## Step 1: rules doc (done)
 
@@ -49,7 +49,7 @@ Verified: `pnpm test` 15/15 (8 existing + 7 new), `pnpm typecheck` clean.
 ## Step 4: client ritual (done, unseen)
 
 - `packages/client/src/FirstDraw.tsx`: modal overlay with the banner ("The highest card plays first!"), a seat for you and for the bot, and a line for the result ("You play first" / "The bot plays first") or the tie message. Cards start face-down and flip in (220 ms scaleX). The winner's card scales up with an amber ring. Props: `draws` (`GameState.firstDraws`), `starter` (`GameState.current`), `onDone`.
-- Timeline (`drawTimeline`, pure): 1000 ms lead, then for the decisive round: your card at +300, bot's at +2000, winner at +3500, end at +7000, so **8.0 s total** for a single round (stretched from 3 s after first look: too quick). Each tied round (your card, bot's card at +1200, "Tie! Drawing again…" at +2000) takes 3 s, so one tie makes it 11 s. No cap on the number of ties (each is roughly 1 in 13).
+- Timeline (`drawTimeline`, pure): 600 ms lead, then for the decisive round: your card at +200, bot's at +1250, winner at +2200, end at +4400, so **5.0 s total** for a single round (first 3 s: too quick; then 8 s: too slow). Each tied round (your card, bot's card at +800, "Tie! Drawing again…" at +1300) takes 2 s, so one tie makes it 7 s. No cap on the number of ties (each is roughly 1 in 13).
 - `packages/client/src/sfx.ts`: synthesized sounds, no asset files: card flip (filtered noise burst), winner (two rising notes), tie (low blip). Not tied to the UI language, no voice.
 - `App.tsx`: `intro` state is true on page load and on every `start()` (new game button, mode change, play again). While true, `canAct` is false, the bot effect doesn't run, and gamepad input is ignored. `gameId` remounts the overlay if "New game" is pressed during the ritual. It is not skippable; the overlay covers the page, but the header (New game, selects) is under the overlay's backdrop so it can't be clicked either.
 - `i18n.tsx`: `drawTitle`, `drawTie`, `drawYouFirst`, `drawBotFirst` in en and pt-BR.
