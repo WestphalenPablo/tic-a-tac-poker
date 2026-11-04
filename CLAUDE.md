@@ -15,3 +15,5 @@ Commands: `pnpm test`, `pnpm typecheck`, `pnpm dev`, `pnpm build` (Node 24, pnpm
 Housekeeping: whenever `*:Zone.Identifier` files (Windows download markers) show up anywhere in the repo, delete them (`find . -name '*:Zone.Identifier' -not -path '*/node_modules/*' -delete`).
 
 Documentation: always document the work we do in MDs under `docs/` (what changed, where, why, how verified, what is not verified), and add new docs to the index in `docs/README.md`. Update the existing doc when extending earlier work.
+
+Commits: when Claude reaches a "finished" state for a prompt (work done, typecheck/tests pass), automatically commit it as atomic commits (one logical change each, split mixed files by hunk). Follow the global rule: user's git identity only, no Claude attribution or Co-Authored-By.
