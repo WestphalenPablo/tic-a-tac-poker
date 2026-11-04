@@ -8,9 +8,9 @@ import { playFlip, playTie, playWin } from './sfx';
 type Draw = Record<PlayerId, Card>;
 type View = { round: number; you: boolean; bot: boolean; tie: boolean; winner: boolean };
 
-/** Timings (ms). One decisive round totals LEAD + DECISIVE = 8000; each tied round adds TIED. */
-const LEAD = 1000, YOU_AFTER = 300, BOT_AFTER = 2000, WINNER_AFTER = 3500, DECISIVE = 7000;
-const TIE_BOT_AFTER = 1200, TIE_MSG_AFTER = 2000, TIED = 3000;
+/** Timings (ms). One decisive round totals LEAD + DECISIVE = 5000; each tied round adds TIED. */
+const LEAD = 600, YOU_AFTER = 200, BOT_AFTER = 1250, WINNER_AFTER = 2200, DECISIVE = 4400;
+const TIE_BOT_AFTER = 800, TIE_MSG_AFTER = 1300, TIED = 2000;
 
 type Step = { at: number; view: View; sound?: () => void };
 
