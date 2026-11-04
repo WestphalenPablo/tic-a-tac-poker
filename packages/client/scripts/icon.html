@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- Source of the PWA/favicon icons. Mirrors CardView/Board styling (see src/CardView.tsx, src/App.tsx, src/index.css).
+     Rendered by scripts/make-icons.py via headless Chrome. Query: ?v=any|maskable|bleed (bleed = square, no rounded corners). -->
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; overflow: hidden; }
+  * { box-sizing: border-box; }
+  #stage { width: 512px; height: 512px; transform-origin: 0 0; display: grid; place-items: center;
+    background: linear-gradient(135deg, #0284c7, #38bdf8); font-family: 'Segoe UI', system-ui, sans-serif; }
+  #stage.any { border-radius: 112px; }
+  /* Board section: bg-white rounded-xl p-3 shadow */
+  .board { background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 10px 25px rgba(0, 0, 0, .25); }
+  .grid { display: grid; grid-template-columns: repeat(3, auto); gap: 16px; justify-content: center; }
+  .cell { border-radius: 8px; }
+  /* .hand-reveal, frozen near the pulse peak */
+  .cell.hit { position: relative; z-index: 1; outline: 3px solid #f59e0b; outline-offset: 2px; box-shadow: 0 0 12px 4px rgba(245, 158, 11, .55); }
+  /* CardView, sm size */
+  .card { width: 68px; height: 96px; padding: 6px; border-radius: 8px; border: 1px solid #cbd5e1; display: flex; flex-direction: column;
+    align-items: flex-start; justify-content: space-between; font-weight: 700; line-height: 1; font-size: 24px; background: #fff;
+    color: #0f172a; box-shadow: 0 1px 2px rgba(0, 0, 0, .05); }
+  .card .suit { align-self: flex-end; font-size: 30px; }
+  .card.empty { border-style: dashed; border-color: #bae6fd; background: rgba(240, 249, 255, .6); box-shadow: none; }
+</style>
+<div id="stage">
+  <div class="board" id="board"><div class="grid">
+    <div class="cell hit"><div class="card"><span>A</span><span class="suit">♠</span></div></div>
+    <div class="cell hit"><div class="card"><span>K</span><span class="suit">♠</span></div></div>
+    <div class="cell hit"><div class="card"><span>Q</span><span class="suit">♠</span></div></div>
+    <div class="cell"><div class="card empty"></div></div><div class="cell"><div class="card empty"></div></div><div class="cell"><div class="card empty"></div></div>
+    <div class="cell"><div class="card empty"></div></div><div class="cell"><div class="card empty"></div></div><div class="cell"><div class="card empty"></div></div>
+  </div></div>
+</div>
+<script>
+  const v = new URLSearchParams(location.search).get('v') || 'any';
+  const stage = document.getElementById('stage');
+  stage.className = v === 'any' ? 'any' : '';
+  // maskable: whole board must sit inside the central 80% circle (launchers crop to it)
+  document.getElementById('board').style.transform = `scale(${v === 'maskable' ? 0.9 : 1.2})`;
+  stage.style.transform = `scale(${innerWidth / 512})`;
+</script>
