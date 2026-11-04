@@ -1,7 +1,8 @@
-import { seeded, type GameState, type Move, type PlayerId, type ServerMessage } from '@tatp/game';
+import { autoMove, seeded, type GameState, type Move, type PlayerId, type ServerMessage } from '@tatp/game';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Rooms } from './rooms.js';
-import { IDLE_MS, Table, type Conn } from './table.js';
+import { IDLE_MS, FIRST_TURN_GRACE_MS, TURN_GRACE_MS, Table, type Conn } from './table.js';
+import { TURN_MS } from '@tatp/game';
 
 class FakeConn implements Conn {
   msgs: ServerMessage[] = [];
@@ -24,6 +25,11 @@ function setup(seed = 42) {
   const mover = aMoves ? { conn: a, seat: ra.seat } : { conn: b, seat: rb.seat };
   const waiter = aMoves ? { conn: b, seat: rb.seat } : { conn: a, seat: ra.seat };
   return { table, onClosed, a, b, ra, rb, mover, waiter };
+}
+
+/** The same rule the server applies on timeout, on a player's own view. */
+function autoMoveFromView(view: GameState): Move {
+  return autoMove(view);
 }
 
 /** A legal plain PLACE derived only from a player's own view of the state. */
@@ -236,6 +242,87 @@ describe('leave', () => {
     const n = mover.conn.msgs.length;
     table.move(mover.seat, { type: 'PLACE', slot: 0, cell: 0 });
     expect(mover.conn.msgs.length).toBe(n);
+  });
+});
+
+describe('time limit', () => {
+  const FIRST = TURN_MS + FIRST_TURN_GRACE_MS;
+
+  it('tells each client how long the player on turn has, grace included', () => {
+    const { a, b } = setup();
+    expect(a.last('state').timeLeftMs).toBe(FIRST);
+    expect(b.last('state').timeLeftMs).toBe(FIRST);
+  });
+
+  it('plays for the player on turn when time runs out, flagged as automatic', () => {
+    const { mover, waiter } = setup();
+    const before = mover.conn.last('state').state;
+    vi.advanceTimersByTime(FIRST - 1);
+    expect(mover.conn.of('state')).toHaveLength(1); // nothing yet
+    vi.advanceTimersByTime(1);
+    const mine = mover.conn.last('state');
+    const theirs = waiter.conn.last('state');
+    expect(mine.lastMove).toMatchObject({ by: 'you', auto: true });
+    expect(theirs.lastMove).toMatchObject({ by: 'opponent', auto: true });
+    const first = before.pool.findIndex((c) => c !== null && typeof c === 'object');
+    expect(mine.lastMove?.move).toMatchObject({ type: 'PLACE', slot: first, cell: 0 });
+    expect(mine.state.grids.p1.filter(Boolean)).toHaveLength(1);
+  });
+
+  it('a move resets the clock for the next player, with the shorter grace', () => {
+    const { table, mover, waiter } = setup();
+    vi.advanceTimersByTime(5000);
+    table.move(mover.seat, plainMove(mover.conn.last('state').state));
+    const next = waiter.conn.last('state');
+    expect(next.timeLeftMs).toBe(TURN_MS + TURN_GRACE_MS);
+    expect(next.state.current).toBe('p1');
+    vi.advanceTimersByTime(TURN_MS + TURN_GRACE_MS);
+    expect(waiter.conn.last('state').lastMove).toMatchObject({ by: 'you', auto: true });
+  });
+
+  it('a manual move cancels the pending timeout of the mover', () => {
+    const { table, mover, waiter } = setup();
+    table.move(mover.seat, plainMove(mover.conn.last('state').state));
+    const n = mover.conn.of('state').length;
+    vi.advanceTimersByTime(TURN_MS + TURN_GRACE_MS - 1);
+    expect(mover.conn.of('state')).toHaveLength(n);
+    expect(waiter.conn.of('state').filter((m) => m.lastMove?.auto)).toHaveLength(0);
+  });
+
+  it('keeps running when the player on turn drops, and a reconnect sees the time left', () => {
+    const { table, a, b, ra, rb, mover } = setup();
+    const gone = mover.conn === a ? a : b;
+    table.disconnect(mover.seat, gone);
+    vi.advanceTimersByTime(10_000);
+    const back = new FakeConn();
+    table.join(mover.seat === ra.seat ? 'Ana' : 'Bia', back, mover.seat === ra.seat ? ra.token : rb.token);
+    expect(back.last('state').timeLeftMs).toBe(FIRST - 10_000);
+  });
+
+  it('stops while nobody is connected and starts a fresh clock on return', () => {
+    const { table, a, b, ra, rb, mover, onClosed } = setup();
+    table.disconnect(ra.seat, a);
+    table.disconnect(rb.seat, b);
+    vi.advanceTimersByTime(IDLE_MS - 1);
+    expect(onClosed).not.toHaveBeenCalled();
+    const back = new FakeConn();
+    table.join(mover.seat === ra.seat ? 'Ana' : 'Bia', back, mover.seat === ra.seat ? ra.token : rb.token);
+    expect(back.last('state').timeLeftMs).toBe(TURN_MS + TURN_GRACE_MS);
+    expect(back.of('state').filter((m) => m.lastMove?.auto)).toHaveLength(0);
+  });
+
+  it('no clock once the game is over', () => {
+    const { table, a, b, mover, waiter } = setup();
+    // Play to the end with legal plain/robber-free picks derived from each view.
+    for (let i = 0; i < 40 && a.last('room').status !== 'finished'; i++) {
+      const cur = a.last('state').state.current === 'p1' ? (mover.conn === a ? mover : waiter) : mover.conn === a ? waiter : mover;
+      table.move(cur.seat, autoMoveFromView(cur.conn.last('state').state));
+    }
+    expect(a.last('room').status).toBe('finished');
+    expect(a.last('state').timeLeftMs).toBeNull();
+    const n = b.msgs.length;
+    vi.advanceTimersByTime(FIRST * 2);
+    expect(b.msgs.length).toBe(n);
   });
 });
 

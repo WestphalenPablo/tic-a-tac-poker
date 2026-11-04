@@ -1,4 +1,4 @@
-import { applyMove, newGame, viewFor, type GameState, type LastMove, type Move, type PlayerId, type RoomStatus, type Rng, type ServerMessage } from '@tatp/game';
+import { applyMove, autoMove, newGame, TURN_MS, viewFor, type GameState, type LastMove, type Move, type PlayerId, type RoomStatus, type Rng, type ServerMessage } from '@tatp/game';
 import { randomUUID } from 'node:crypto';
 
 /** A connected client as the table sees it. The table never touches sockets directly. */
@@ -12,6 +12,11 @@ interface Seat { name: string; token: string; conn: Conn | null }
 /** A room with nobody connected is dropped after this long. */
 export const IDLE_MS = 10 * 60 * 1000;
 
+/** Extra time on top of TURN_MS per turn, for the opponent's move animation and voice clip to finish. */
+export const TURN_GRACE_MS = 3000;
+/** The first turn of a game also waits out the opening draw ritual. */
+export const FIRST_TURN_GRACE_MS = TURN_GRACE_MS + 6000;
+
 const SEATS: PlayerId[] = ['p1', 'p2'];
 const otherSeat = (s: PlayerId): PlayerId => (s === 'p1' ? 'p2' : 'p1');
 
@@ -23,6 +28,8 @@ export class Table {
   private state: GameState | null = null;
   private rematch = new Set<PlayerId>();
   private idle: ReturnType<typeof setTimeout> | null = null;
+  private turnTimer: ReturnType<typeof setTimeout> | null = null;
+  private deadline = 0;
   closed = false;
 
   constructor(readonly id: string, private rng: Rng, private onClosed: (id: string) => void) {
@@ -53,6 +60,7 @@ export class Table {
 
     if (!this.state && this.seats.p1 && this.seats.p2) this.startGame();
     else {
+      if (this.state?.phase === 'playing' && !this.turnTimer) this.armTurn(TURN_GRACE_MS); // somebody came back to a paused clock
       this.broadcastRoom();
       if (this.state) this.sendState(seat, null, false);
     }
@@ -70,9 +78,25 @@ export class Table {
     } catch {
       return conn?.send({ t: 'error', code: 'illegal_move' });
     }
+    this.play(seat, next, move, false);
+  }
+
+  /** Applies the result of a move: next clock, then everyone sees the new state. */
+  private play(seat: PlayerId, next: GameState, move: Move, auto: boolean): void {
     this.state = next;
-    for (const s of SEATS) this.sendState(s, { move, by: s === seat ? 'you' : 'opponent' }, false);
+    if (next.phase === 'playing') this.armTurn(TURN_GRACE_MS);
+    else this.disarmTurn();
+    for (const s of SEATS) this.sendState(s, { move, by: s === seat ? 'you' : 'opponent', ...(auto ? { auto: true as const } : {}) }, false);
     if (next.phase === 'finished') this.broadcastRoom();
+  }
+
+  /** Time limit hit: the server plays for whoever is on turn. */
+  private timeUp(): void {
+    this.turnTimer = null;
+    if (this.closed || this.state?.phase !== 'playing') return;
+    const seat = this.state.current;
+    const move = autoMove(this.state);
+    this.play(seat, applyMove(this.state, move, this.rng), move, true);
   }
 
   requestRematch(seat: PlayerId): void {
@@ -87,6 +111,7 @@ export class Table {
   leave(): void {
     this.closed = true;
     this.disarmIdle();
+    this.disarmTurn();
     for (const s of SEATS) {
       const seat = this.seats[s];
       if (seat?.conn) seat.conn.send({ t: 'room', ...this.roomFor(s, 'closed') });
@@ -100,14 +125,31 @@ export class Table {
     if (!s || s.conn !== conn) return; // already replaced by a reconnect
     s.conn = null;
     this.broadcastRoom();
-    if (!SEATS.some((x) => this.seats[x]?.conn)) this.armIdle();
+    if (!SEATS.some((x) => this.seats[x]?.conn)) {
+      this.disarmTurn(); // nobody to play against the clock
+      this.armIdle();
+    }
   }
 
   private startGame(): void {
     this.rematch.clear();
     this.state = newGame(this.rng, 'MSN');
     this.broadcastRoom();
+    this.armTurn(FIRST_TURN_GRACE_MS);
     for (const s of SEATS) this.sendState(s, null, true);
+  }
+
+  private armTurn(graceMs: number): void {
+    this.disarmTurn();
+    const ms = TURN_MS + graceMs;
+    this.deadline = Date.now() + ms;
+    this.turnTimer = setTimeout(() => this.timeUp(), ms);
+    this.turnTimer.unref?.();
+  }
+
+  private disarmTurn(): void {
+    if (this.turnTimer) clearTimeout(this.turnTimer);
+    this.turnTimer = null;
   }
 
   private status(): RoomStatus {
@@ -133,7 +175,8 @@ export class Table {
 
   private sendState(seat: PlayerId, lastMove: LastMove | null, fresh: boolean): void {
     if (!this.state) return;
-    this.seats[seat]?.conn?.send({ t: 'state', state: viewFor(this.state, seat), lastMove, fresh });
+    const timeLeftMs = this.turnTimer ? Math.max(0, this.deadline - Date.now()) : null;
+    this.seats[seat]?.conn?.send({ t: 'state', state: viewFor(this.state, seat), lastMove, fresh, timeLeftMs });
   }
 
   private armIdle(): void {
