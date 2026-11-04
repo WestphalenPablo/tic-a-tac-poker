@@ -1,0 +1,22 @@
+# Render Blueprint for the multiplayer server. The client is deployed separately to GitHub Pages.
+# See docs/multiplayer-server.md. Root directory stays empty: the build needs the whole pnpm workspace.
+services:
+  - type: web
+    name: tatp-server
+    runtime: node
+    plan: starter # paid on purpose: free web services sleep after ~15 min idle
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @tatp/server build
+    startCommand: node packages/server/dist/index.cjs
+    healthCheckPath: /health
+    buildFilter:
+      paths:
+        - packages/server/**
+        - packages/game/**
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+    envVars:
+      - key: NODE_VERSION
+        value: 24.18.0
+      - key: ALLOWED_ORIGINS
+        value: https://westphalenpablo.github.io

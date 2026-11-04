@@ -7,7 +7,8 @@
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "dev": "pnpm --filter @tatp/client dev",
-    "build": "pnpm --filter @tatp/client build"
+    "build": "pnpm --filter @tatp/client build",
+    "dev:server": "pnpm --filter @tatp/server dev"
   },
   "packageManager": "pnpm@12.16.1"
 }
