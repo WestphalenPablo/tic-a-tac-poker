@@ -17,6 +17,9 @@ export interface Incoming { state: GameState; lastMove: LastMove | null; fresh: 
 /** Errors that end the session. Everything else is a rejected move. */
 const FATAL: ErrorCode[] = ['room_not_found', 'room_full', 'server_full', 'bad_message', 'no_room'];
 
+/** How long a connection attempt may take before we say the server is waking up. */
+const SLOW_MS = 4000;
+
 const tokenKey = (id: string) => `tatp.room.${id}`;
 const loadToken = (id: string) => { try { return localStorage.getItem(tokenKey(id)) ?? undefined; } catch { return undefined; } };
 const saveToken = (id: string, token: string) => { try { localStorage.setItem(tokenKey(id), token); } catch { /* ignore */ } };
@@ -33,6 +36,8 @@ export function useRoom(onState: (m: Incoming) => void, onRejected: (code: Error
   const [roomId, setRoomId] = useState<string | null>(null);
   const [info, setInfo] = useState<RoomView | null>(null);
   const [error, setError] = useState<ErrorCode | null>(null);
+  /** Still not connected a few seconds in: probably a sleeping free-tier server, worth telling the player. */
+  const [slow, setSlow] = useState(false);
 
   const sock = useRef<WebSocket | null>(null);
   const session = useRef<Session | null>(null);
@@ -133,5 +138,11 @@ export function useRoom(onState: (m: Incoming) => void, onRejected: (code: Error
 
   useEffect(() => stop, [stop]);
 
-  return { link, roomId, info, error, create, join, sendMove, rematch, leave };
+  useEffect(() => {
+    if (link === 'open' || link === 'idle') { setSlow(false); return; }
+    const id = setTimeout(() => setSlow(true), SLOW_MS);
+    return () => clearTimeout(id);
+  }, [link]);
+
+  return { slow, link, roomId, info, error, create, join, sendMove, rematch, leave };
 }

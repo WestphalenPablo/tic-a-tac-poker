@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { animateBotMove, cancelAnimations } from './animations';
 import { CardView } from './CardView';
-import { SERVER_URL } from './config';
+import { SERVER_URL, wakeServer } from './config';
 import { FirstDraw } from './FirstDraw';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
@@ -161,6 +161,7 @@ export function App() {
   };
 
   useEffect(() => { if (room.roomId) showRoomInUrl(room.roomId); }, [room.roomId]);
+  useEffect(() => { if (screen === 'menu') wakeServer(); }, [screen]);
 
   const play = (slot: number, cell: number, as?: { rank: Rank; suit: Suit }) => {
     playFlip();
@@ -296,7 +297,7 @@ export function App() {
       {!help && online && room.error && <NoticeModal title={errorText.title} body={errorText.body} action={t('backToMenu')} onAction={toMenu} />}
       {!help && online && !room.error && room.info?.status === 'closed' && <NoticeModal title={t('roomClosed')} body={t('roomClosedBody')} action={t('backToMenu')} onAction={toMenu} />}
       {!help && online && !room.error && room.info?.status === 'waiting' && room.roomId && <RoomModal url={roomUrl(room.roomId)} offline={room.link !== 'open'} onLeave={toMenu} />}
-      {!help && online && !room.error && !gotState && !room.info && <NoticeModal title={room.link === 'reconnecting' ? t('reconnecting') : t('connecting')} action={t('cancel')} onAction={toMenu} />}
+      {!help && online && !room.error && !gotState && !room.info && <NoticeModal title={room.slow ? t('wakingTitle') : t('connecting')} body={room.slow ? t('wakingBody') : undefined} action={t('cancel')} onAction={toMenu} />}
 
       {intro && !help && inGame && (
         <FirstDraw key={gameId} draws={game.firstDraws} starter={game.current} onDone={() => setIntro(false)}
