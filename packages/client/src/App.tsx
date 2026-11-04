@@ -15,13 +15,14 @@ type Zone = 'mine' | 'pool' | 'theirs';
 type Cursor = { zone: Zone; idx: number };
 
 /** Moves the controller cursor. Layout: my board | pool column | bot board; boards are 3x3. */
-function moveCursor(c: Cursor, dir: 'up' | 'down' | 'left' | 'right', poolSize: number): Cursor {
+function moveCursor(c: Cursor, dir: 'up' | 'down' | 'left' | 'right', poolSize: number, canTheirs: boolean): Cursor {
   const last = Math.max(0, poolSize - 1);
   if (c.zone === 'pool') {
     if (dir === 'up') return { ...c, idx: Math.max(0, c.idx - 1) };
     if (dir === 'down') return { ...c, idx: Math.min(last, c.idx + 1) };
     const row = Math.min(2, c.idx);
-    return dir === 'left' ? { zone: 'mine', idx: row * 3 + 2 } : { zone: 'theirs', idx: row * 3 };
+    if (dir === 'left') return { zone: 'mine', idx: row * 3 + 2 };
+    return canTheirs ? { zone: 'theirs', idx: row * 3 } : c;
   }
   const row = Math.floor(c.idx / 3), col = c.idx % 3;
   if (dir === 'up') return { ...c, idx: Math.max(0, row - 1) * 3 + col };
@@ -104,6 +105,13 @@ export function App() {
     : game.placementsLeft > 1 ? t('robbedPick') : t('yourTurn');
 
   const res0 = game.phase === 'finished';
+  // The bot's grid is only reachable while choosing which card to rob.
+  const canTheirs = myTurn && sel?.kind === 'steal' && sel.from === undefined;
+  useEffect(() => {
+    if (canTheirs || cursor.zone !== 'theirs') return;
+    const empty = game.grids[HUMAN].findIndex((x) => !x);
+    setCursor(sel && empty >= 0 ? { zone: 'mine', idx: empty } : { zone: 'pool', idx: 0 });
+  }, [canTheirs, cursor.zone, sel, game]);
   useGamepad((a) => {
     if (joker !== null) return; // JokerPicker handles its own input
     if (res0) { if (a === 'a') start(); return; }
@@ -115,7 +123,7 @@ export function App() {
       else onTheirCell(cursor.idx);
       return;
     }
-    setCursor((c) => moveCursor(c, a, game.pool.length));
+    setCursor((c) => moveCursor(c, a, game.pool.length, canTheirs));
   });
   const focusAt = (zone: Zone, i: number) => padUsed && cursor.zone === zone && cursor.idx === i;
 
