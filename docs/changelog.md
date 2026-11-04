@@ -72,3 +72,7 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 **What:** board columns were spaced wider than rows. The grid used `grid-cols-3 justify-items-center`, so each column stretched to a third of the board and cards floated in the middle. Now `grid-cols-[repeat(3,auto)] justify-center`: columns hug the cards and the gap is the same in both directions. Introduced by the responsive layout commit (911381a). **Where:** `Board` in `packages/client/src/App.tsx`. **Verified:** `pnpm typecheck`. **Not verified:** visually in a browser (desktop and phone).
 
 **Follow-up (grid breathing room):** board gap raised to `gap-4` (16px) from `sm` up, `gap-2` (8px) below `sm`, because three 44px phone cards plus two 16px gaps would overflow the half-width phone boards. Not verified in a browser.
+
+## Online rooms
+
+**What:** play a friend over a shared link. New `packages/server` (Node + `ws`), wire protocol in `packages/game/src/protocol.ts`, and a lobby flow in the client. Design in [multiplayer-server.md](multiplayer-server.md), UI in [online-rooms-ui.md](online-rooms-ui.md).

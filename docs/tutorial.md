@@ -19,3 +19,7 @@
 ## Update: no mode mentions
 
 The MSN/Classic selector was removed from the header and the app always starts in MSN (`App.tsx`: `mode` is fixed; `Mode`/Classic stay implemented in `@tatp/game`, and the `modeMsn`/`modeClassic` i18n keys are unused for now). The tutorial no longer mentions modes and says "your opponent" instead of "the bot" (en and pt-BR). Verified: `pnpm typecheck`. Not verified: in a browser.
+
+## Update: the tutorial now leads into a mode menu
+
+The tutorial is still first-launch only (plus the `?` button). Closing it no longer drops straight into a bot game: the app shows the mode menu (*Play vs bot* / *Create a room to play a friend*). The menu appears on every visit to the root URL; the header *New game* button reopens it. Opened from a room link, the app shows the tutorial first (if never seen), then skips the menu and asks for a name to join that room. Details in [online-rooms-ui.md](online-rooms-ui.md). Verified in a browser (Playwright, Chromium): tutorial then menu on first load, no tutorial on reload.

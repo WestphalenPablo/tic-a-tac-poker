@@ -11,6 +11,7 @@ Working notes on what has been built and why. The master doc for rules and statu
 | [v1.md](v1.md) | The `v1` tag: canonical baseline of the single-player MVP |
 | [github-pages.md](github-pages.md) | Static deploy to GitHub Pages: base path, sound URLs, workflow |
 | [tutorial.md](tutorial.md) | Welcome/tutorial wizard modal: first launch, `?` button, input gating |
+| [online-rooms-ui.md](online-rooms-ui.md) | Client side of online play: flow, screens, snapshot handling, names, reconnect, how it was verified |
 | [multiplayer-server.md](multiplayer-server.md) | Decision: Node + `ws` server on Render, client stays on Pages (same repo, two hosts); open questions |
 
 ## Convention
