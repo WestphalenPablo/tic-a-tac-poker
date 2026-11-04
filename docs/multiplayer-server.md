@@ -1,81 +1,74 @@
-# Multiplayer server: decision
+# Multiplayer server
 
-**Status:** decision only. Nothing is built yet. This doc records what we chose and why, so the implementation starts from a settled plan.
+**Status:** implemented and tested locally (`packages/server`, protocol in `packages/game/src/protocol.ts`). **Not yet deployed to Render**; see "Deploying" for the manual steps and what is unverified.
 
 ## Decision
 
-Multiplayer will be an **authoritative Node server using `ws`, hosted as a Render Web Service**. The client stays a static site on GitHub Pages and connects to the server over `wss://`.
+An **authoritative Node server using `ws`, hosted as a Render Web Service**. The client stays a static site on GitHub Pages and connects to the server over `wss://`.
 
 ```
-browser (GitHub Pages)  ──wss──▶  Node server (Render)  ──▶  tables: Map<tableId, Table>
-                                                           └─ Table: GameState, sockets, applyMove
+browser (GitHub Pages)  ──wss──▶  Node server (Render)  ──▶  rooms: Map<roomId, Table>
+                                                           └─ Table: GameState, Rng, 2 seats
 ```
 
-- **Authoritative:** the server owns each table's `GameState` and the `Rng`. Clients send moves; the server validates them with `applyMove` from `@tatp/game` and broadcasts the result. Clients never decide outcomes.
-- **Plain `ws`, not Socket.IO.** The archived plan in `legacy/` said Socket.IO. We don't need its rooms, fallbacks or reconnect layer for a two-player turn-based game, and a thin `ws` layer keeps the protocol explicit. This supersedes the legacy plan.
-- **New package `packages/server`**, importing `@tatp/game`. It reuses the pure rules package unchanged, which is why the rules package has no I/O and takes an injected `Rng`.
-- **In-memory tables, one instance.** A table lives in the process's memory. A restart or deploy drops live tables. Accepted for the MVP; a restart cannot corrupt anything because there is no stored state.
+- **Authoritative.** The server owns each room's `GameState` and `Rng` (`seeded(crypto.randomInt(2**32))`). Clients send moves; the server validates them with `applyMove` from `@tatp/game` and broadcasts the result.
+- **Plain `ws`, not Socket.IO** (this supersedes the legacy plan). A two-player turn-based game does not need rooms, fallbacks or its reconnect layer; the protocol stays explicit.
+- **In-memory rooms, one instance.** A restart or deploy drops live rooms. Accepted for now.
 
-## Why this and not the alternatives
+### Why not the alternatives
 
-GitHub Pages cannot host the server: it serves static files only, with no process, WebSockets or state.
+GitHub Pages cannot host the server: static files only, no process, no WebSockets.
 
 | Option | Outcome |
 |---|---|
-| Cloudflare Workers + Durable Objects | Considered seriously (free tier, per-table persistent state, no cold starts). Dropped: the owner wants a plain Node process, a flatter learning curve, and no platform lock-in. |
+| Cloudflare Workers + Durable Objects | Considered seriously (free tier, per-room state). Dropped: the owner wants a plain Node process and no platform lock-in. |
 | Fly.io | Dropped in favour of Render. |
-| Render Web Service | **Chosen.** Plain Node, runs locally with no special tooling, deploys from the repo. |
-| WebRTC peer-to-peer | Rejected: still needs signalling, and the host could cheat (it controls the RNG and the state). |
+| Render Web Service | **Chosen.** Plain Node, runs locally with no special tooling. |
+| WebRTC peer-to-peer | Rejected: needs signalling, and the host could cheat. |
+| Render serves the client too | Rejected: every client change would restart the server and drop live rooms (Build Filters cannot help), no CDN, and it retires the working Pages deploy. Revisit if rooms ever survive restarts. |
 
-## Render setup (when there is something to deploy)
+## Protocol
 
-- Service type: **Web Service** (not Static Site, Private Service or Background Worker; only a Web Service accepts public WebSocket connections).
-- Instance type: a **paid** one. Always-on is a requirement, and Render's free web services sleep after about 15 minutes idle, which would delay the first player of the day. Check current pricing before creating it.
-- Build: `pnpm install && pnpm --filter @tatp/server build`. Start: `node packages/server/dist/index.js`. These are placeholders until `packages/server` exists.
-- The server must listen on `process.env.PORT`.
-- Restrict WebSocket upgrades to the Pages origin (`https://westphalenpablo.github.io`) via an `Origin` check.
-- The Pages build needs the server URL at build time (a Vite env var), so `docs/github-pages.md` will need an update when this lands.
+One endpoint, `/ws` (any path is accepted; there is no REST, so no CORS). JSON messages; types and the validator live in `packages/game/src/protocol.ts`.
+
+Client to server: `create{name}`, `join{id,name,token?}`, `move{move}`, `rematch`, `leave`.
+Server to client: `created{id,token}`, `joined{token}`, `room{status,you,opponent,opponentOnline}`, `state{state,lastMove?,fresh}`, `error{code}`.
+
+- `parseClientMessage` validates everything at the boundary: shapes, integer ranges for slots and cells, Joker `rank`/`suit` against the real sets (a forged Joker identity would corrupt scoring), names trimmed to 20 chars with control characters stripped.
+- **Seats.** The creator is `p1`, the joiner `p2`. Each seat gets a random token (`crypto.randomUUID`) used to reclaim it after a disconnect.
+- **Perspective.** `viewFor(state, seat)` returns a view where the receiver is always `p1`: `grids`, `owed`, `current` and `firstDraws` are swapped for `p2`. `Move` carries no player id, so moves need no translation. The existing UI (which assumes "me = p1, opponent = p2") therefore works unchanged for a remote opponent.
+- **Hidden information.** `deck` and `discard` are emptied in every view. The pool, both grids and the opening draws are public.
+- `state.fresh` is true only when a game starts (first game or rematch); the client replays the opening draw on it. Reconnect snapshots have `fresh:false`.
+- `state.lastMove` carries the move just played and who made it (`you`/`opponent`), so the client can animate the opponent's move.
+
+## Room lifecycle
+
+`waiting` (creator alone) → `playing` (second seat joins, `newGame(rng,'MSN')`) → `finished` → both players send `rematch` → `playing` again with a new game. `leave` closes the room for both seats. A disconnect only marks the seat offline and tells the opponent. A room with no connected sockets is dropped after 10 minutes. Room ids are 8 unguessable url-safe characters; at most 500 rooms exist at once. No turn timer.
+
+## Server hardening
+
+- `Origin` allowlist on the WebSocket upgrade (`ALLOWED_ORIGINS`, default `https://westphalenpablo.github.io,http://localhost:5173`).
+- `maxPayload` of 2 KB; invalid messages get `error{bad_message}`.
+- ws ping every 25 s so the proxy does not idle the connection out.
+- `GET /health` returns 200 for Render's health check.
+- Not done: per-IP rate limiting.
 
 ## One repo, two hosts
 
-Pages and Render both deploy from this same repo and know nothing about each other.
+Pages and Render both deploy from this repo and know nothing about each other.
 
-- **Pages** keeps deploying the client through `.github/workflows/pages.yml` on pushes to `master`, as in `github-pages.md`.
-- **Render** watches the same repo and branch, and builds and runs `packages/server`.
+- **Pages** keeps deploying the client through `.github/workflows/pages.yml`, as in `github-pages.md`.
+- **Render** watches the same repo and branch and builds `packages/server`. `render.yaml` at the repo root declares the service.
+- **Leave Render's Root Directory empty.** The server imports `@tatp/game` through the pnpm workspace; the server build bundles it (esbuild), so the whole workspace must be present.
+- **Build Filters** (in `render.yaml`) stop client-only commits from redeploying the server, since a redeploy drops live rooms: `packages/server/**`, `packages/game/**`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`.
+- The only coupling is the server URL (a build-time variable for the client) and the Pages origin (the server's Origin check).
 
-Monorepo details:
+## Deploying (manual, not done)
 
-- **Leave Render's Root Directory empty (repo root).** The server imports `@tatp/game` through the pnpm workspace, so the build needs the whole workspace. A root of `packages/server` would break that resolution.
-- **Use Build Filters** so client-only commits do not redeploy the server (a redeploy drops live tables, since they are in memory). Included paths: `packages/server/**`, `packages/game/**`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`. Confirm the exact filter syntax in Render's docs when setting it up.
-- **Optional `paths:` filter on `pages.yml`** so server-only commits do not rebuild the client. Harmless either way. `packages/game` changes must still rebuild both.
-- **Prefer a `render.yaml` Blueprint** at the repo root, declaring the service (build, start, build filters, plan) as code instead of dashboard clicks. Write it when `packages/server` exists, since the commands are placeholders until then.
-- Render needs the GitHub app installed on the repo. Pages from a workflow works on public repos; a private repo needs a paid GitHub plan.
-
-The only coupling is the server URL (client build) and the Pages origin (server Origin check), both listed above.
-
-### Alternative considered: Render serves the client too
-
-The Node server could also serve `packages/client/dist` from the same Web Service. Gains: same origin (no CORS, no Origin allowlist, no server-URL env var, relative `/ws`), one deploy so client and server cannot drift. Costs: every client change restarts the server and drops live tables (Build Filters cannot help, the client is part of the service); no CDN for the client; a paid instance serves static traffic; the working Pages setup is retired or duplicated. A Render Static Site (free, CDN, independent deploys) was also considered, but it is still two origins, so it adds little over Pages.
-
-**Decision: keep GitHub Pages for the client.** Revisit if tables gain persistence and reconnect handling, which would remove the main objection to serving both from Render.
-
-## Planned order
-
-1. Local echo server with `ws`, to settle the plumbing.
-2. Wire in `@tatp/game`: tables, `applyMove`, rejecting illegal moves, state snapshots.
-3. Client "play online" mode.
-4. Create the Render service and deploy.
-
-## Open questions (decide before step 2)
-
-- **Hidden information:** which parts of the state must never be sent to a player (for example the undrawn deck and, if relevant, the opponent's pending draw)? The snapshot sent to each player must be filtered per player.
-- **Wire protocol:** message types and where the shared types live (`packages/game` or a new `packages/protocol`).
-- **Seating and lobby:** how a table is created and joined (share a code or link, matchmaking or both).
-- **Disconnects:** reconnect window, and what happens to an abandoned game.
-- **Turn timer:** the README lists it as not built; decide whether online play needs one.
-- **First-draw ritual:** it is cosmetic in single player; online, the server should run it and record `firstDraws` so both clients show the same thing.
-- **Persistence:** none planned. Revisit if restarts drop games often enough to matter, or if accounts and history are wanted (Render Postgres would be the next step).
+1. Render dashboard: New → Blueprint, pick this repo; it reads `render.yaml`. The plan is a paid one because always-on is a requirement (Render's free web services sleep after ~15 minutes idle). Check current pricing.
+2. When the service is live, set the GitHub repo variable `VITE_SERVER_URL=wss://<service>.onrender.com` (Settings → Secrets and variables → Actions → Variables) and re-run the Pages workflow. Until it is set, the production client hides "Create room" and only offers the bot.
+3. If the Pages URL ever changes, update `ALLOWED_ORIGINS`.
 
 ## Verified / not verified
 
-Nothing here is implemented, so nothing is verified. The Render service type and the Pages-cannot-host-a-server claim come from Render's service picker and general knowledge of GitHub Pages; Render's pricing and free-tier sleep behaviour were not re-checked against current docs.
+See the verification sections of the commits' docs: `pnpm test` covers the protocol and the table logic with fake connections, plus an integration test with real `ws` clients. **Not verified:** the Render deployment itself (corepack/pnpm on Render, build filter syntax, `NODE_VERSION`), behaviour under Render's proxy (idle timeouts), and Render pricing/free-tier behaviour, none re-checked against current docs.
