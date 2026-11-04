@@ -50,3 +50,11 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 **Why DOM-driven:** game state stays a pure reducer; state changes only at landing, so the old board is visible during the flight.
 
 **Verified:** `pnpm typecheck`. **Not verified:** visual feel/timing in a browser (pop 450ms + fly 650–800ms, steal ≈ 1.8s total), mobile layout, reduced-motion handling (none added).
+
+## Default bot difficulty: Easy
+
+**What:** the difficulty selector now starts on Easy instead of Hard.
+
+**Where:** `packages/client/src/App.tsx` (`useState<Difficulty>('easy')`).
+
+**Verified:** `pnpm typecheck`. **Not verified:** in the browser.

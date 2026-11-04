@@ -40,7 +40,7 @@ type Pending = { slot: number } & ({ kind: 'place' } | { kind: 'steal'; from?: n
 export function App() {
   const { t, lang, setLang } = useI18n();
   const [mode, setMode] = useState<Mode>('MSN');
-  const [level, setLevel] = useState<Difficulty>('hard');
+  const [level, setLevel] = useState<Difficulty>('easy');
   const rng = useRef(seeded(Date.now()));
   const [game, setGame] = useState<GameState>(() => newGame(rng.current, 'MSN'));
   const [sel, setSel] = useState<Pending | null>(null);
