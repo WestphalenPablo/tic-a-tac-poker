@@ -69,6 +69,10 @@ export function App() {
     if (myTurn && sel?.kind === 'steal' && game.grids[other(HUMAN)][i]) setSel({ ...sel, from: i });
   };
 
+  // Drag sources/targets (mouse). Touch and keyboard users keep the click flow.
+  const dragPool = (slot: number) => () => onPool(slot);
+  const dragTheirs = (i: number) => () => onTheirCell(i);
+
   const res = game.phase === 'finished' ? result(game) : null;
   const status = res ? t('gameOver')
     : !myTurn ? t('botTurn')
@@ -102,12 +106,13 @@ export function App() {
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4">
         <Board who="p1" title={t('you')} color="you" game={game} scores={scores.p1} active={game.current === 'p1' && game.phase === 'playing'}
-          onCell={onMyCell} highlight={myTurn && !!sel && (sel.kind === 'place' || sel.from !== undefined)} />
+          onCell={onMyCell} onDropCell={onMyCell} highlight={myTurn && !!sel && (sel.kind === 'place' || sel.from !== undefined)} />
         <div className="flex flex-col items-center gap-2 rounded-xl bg-sky-100 p-2 shadow-inner">
-          {game.pool.map((c, i) => <CardView key={i} card={c} selected={sel?.slot === i} onClick={() => onPool(i)} />)}
+          {game.pool.map((c, i) => <CardView key={i} card={c} selected={sel?.slot === i} onClick={() => onPool(i)}
+            drag={myTurn && c != null ? { onDragStart: dragPool(i) } : undefined} />)}
         </div>
         <Board who="p2" title={t('bot')} color="bot" game={game} scores={scores.p2} active={game.current === 'p2' && game.phase === 'playing'}
-          onCell={onTheirCell} highlight={myTurn && sel?.kind === 'steal' && sel.from === undefined} />
+          onCell={onTheirCell} onDragCell={myTurn && sel?.kind === 'steal' ? dragTheirs : undefined} onDropCell={onTheirCell} highlight={myTurn && sel?.kind === 'steal' && sel.from === undefined} />
       </div>
 
       {joker !== null && sel && <JokerPicker onCancel={() => setJoker(null)} onConfirm={(as) => play(sel.slot, joker, as)} />}
@@ -132,9 +137,10 @@ export function App() {
   );
 }
 
-function Board({ who, title, color, game, scores, active, onCell, highlight }: {
+function Board({ who, title, color, game, scores, active, onCell, highlight, onDragCell, onDropCell }: {
   who: PlayerId; title: string; color: 'you' | 'bot'; game: GameState;
   scores: ReturnType<typeof scoreGrid>; active: boolean; onCell: (i: number) => void; highlight: boolean;
+  onDragCell?: (i: number) => () => void; onDropCell: (i: number) => void;
 }) {
   const { t, lang } = useI18n();
   return (
@@ -149,7 +155,11 @@ function Board({ who, title, color, game, scores, active, onCell, highlight }: {
       <div className="grid grid-cols-3 gap-1.5">
         {game.grids[who].map((c, i) => (
           <div key={i} className={clsx(highlight && (who === 'p1' ? !c : !!c) && 'rounded-lg ring-2 ring-amber-400')}>
-            <CardView small card={c} onClick={() => onCell(i)} />
+            <CardView small card={c} onClick={() => onCell(i)}
+              drag={{
+                onDragStart: onDragCell && c ? onDragCell(i) : undefined,
+                onDrop: () => onDropCell(i),
+              }} />
           </div>
         ))}
       </div>
