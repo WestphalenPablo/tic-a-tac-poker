@@ -4,6 +4,8 @@ import type { Card, DeckCard, GameResult, GameState, Move, PlayerId, Rng } from 
 import { RANKS, SUITS } from './types.js';
 
 export const POOL_SIZE = 5;
+/** Time limit for each placement. When it runs out, `autoMove` is played for the player. */
+export const TURN_MS = 30_000;
 export const other = (p: PlayerId): PlayerId => (p === 'p1' ? 'p2' : 'p1');
 
 export type Mode = 'MSN' | 'CLASSIC';
@@ -159,6 +161,21 @@ export function legalMoves(s: GameState): Move[] {
     }
   });
   return out;
+}
+
+/**
+ * The move played for a player whose time ran out: the first playable pool slot, into the first empty cell.
+ * A Robber steals the opponent's first card; a Joker becomes the Ace of spades.
+ */
+export function autoMove(s: GameState): Move {
+  const me = s.current;
+  const slot = s.pool.findIndex((_, i) => slotPlayable(s, me, i));
+  if (slot < 0) throw new IllegalMove('no playable card');
+  const to = s.grids[me].findIndex((c) => c === null);
+  const picked = s.pool[slot];
+  if (picked === 'ROBBER') return { type: 'STEAL', slot, from: s.grids[other(me)].findIndex((c) => c !== null), to };
+  if (picked === 'JOKER') return { type: 'PLACE', slot, cell: to, as: { rank: 'A', suit: 'S' } };
+  return { type: 'PLACE', slot, cell: to };
 }
 
 export const scoreOf = (s: GameState, p: PlayerId) => scoreGrid(s.grids[p]).total;

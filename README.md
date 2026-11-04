@@ -32,7 +32,8 @@ The project began as research, all archived in [`legacy/`](legacy/README.md):
 | Joker and Robber ("MSN" mode) and plain 52-card "Classic" mode | **Built** (toggle in header) |
 | Online rooms: authoritative Node + `ws` server, share link, names, rematch | **Built** (`packages/server`; deploy to Render pending, see [docs/multiplayer-server.md](docs/multiplayer-server.md)) |
 | Lobby, matchmaking, chat | **Not built** |
-| Turn timer, sound, card art, animations | **Not built** |
+| Turn timer (30 s, auto-play on expiry) | **Built** |
+| Sound, card art, animations | **Not built** |
 
 ```
 packages/game/     pure TypeScript: types, scoring, reducer (applyMove), bot. Randomness is injected.
@@ -65,6 +66,8 @@ legacy/            original research, specs and footage
 
 **End.** The game ends when both grids are full. Higher score wins; a tie goes to the player with more scoring lines ("completed hands"); otherwise it is a draw. If one grid fills first, the other player keeps playing.
 
+**Time limit.** Every placement has 30 seconds (a player who owes two placements gets a fresh 30 s for each). When it runs out the game plays for them: the first playable pool slot (lowest index; a Robber is playable only if it can steal), into the first empty cell (lowest index). A Robber steals the opponent's first card; a Joker becomes the Ace of spades. The original game's timer length is undocumented, so 30 s is our decision. The clock does not run during the opening draw. Against the bot it is paused while the opening draw, the help dialog or a voice clip is up. Online the server owns the clock: each turn adds a 3 s grace for animations and clips (6 s more on the first turn of a game), the client shows at most 30 s, and the clock keeps running if the player on turn disconnects (so the opponent is never stuck) but stops while nobody is connected.
+
 **Edge cases (our decisions).** If the pool holds only unplayable Robbers they are swapped out. If the deck empties, discarded Robbers are reshuffled; if nothing is left the game ends.
 
 **Bots.** *Easy* maximises its immediate score gain. *Hard* maximises score swing (own gain minus opponent loss, so it favours Robbing scored cards), plus a bonus for denying cards the opponent could score with, plus a small bonus for promising partial lines. Hard beat Easy 79–20 over 100 seeded games.
@@ -77,7 +80,7 @@ legacy/            original research, specs and footage
 
 **Hidden information.** Each player receives a view in which they are always `p1` and the opponent `p2`; the deck and discard pile are never sent. The pool, both grids and the opening draws are public, as at a real table.
 
-**Disconnects.** A refresh or reconnect on the same browser keeps the seat (a per-seat token is stored locally). The opponent sees "waiting for X to reconnect…". A room with nobody connected is dropped after 10 minutes. Leaving a room on purpose closes it for both players. There is no turn timer.
+**Disconnects.** A refresh or reconnect on the same browser keeps the seat (a per-seat token is stored locally). The opponent sees "waiting for X to reconnect…". A room with nobody connected is dropped after 10 minutes. Leaving a room on purpose closes it for both players. The turn clock is described under *Time limit*.
 
 **Rematch.** After a game ends, when both players click *Play again* the same room starts a fresh game with a new opening draw.
 

@@ -17,15 +17,20 @@ export type RoomStatus = 'waiting' | 'playing' | 'finished' | 'closed';
 export type ErrorCode = 'room_not_found' | 'room_full' | 'bad_message' | 'illegal_move' | 'not_your_turn' | 'no_room' | 'server_full';
 
 /** `by` is relative to the receiver: 'you' made it, or the 'opponent' did. */
-export interface LastMove { move: Move; by: 'you' | 'opponent' }
+/** `auto` is set when the time limit ran out and the server played for that player. */
+export interface LastMove { move: Move; by: 'you' | 'opponent'; auto?: true }
 
 export type ServerMessage =
   /** Sent to a player when they take (or reclaim) a seat, creator included. `token` reclaims the seat later. */
   | { t: 'joined'; id: string; token: string }
   /** `rematch` tells each side who has asked for another game once this one is finished. */
   | { t: 'room'; status: RoomStatus; you: string; opponent: string | null; opponentOnline: boolean; rematch: { you: boolean; opponent: boolean } }
-  /** `fresh` is true only when a game starts (first game or rematch); reconnect snapshots are not fresh. */
-  | { t: 'state'; state: GameState; lastMove: LastMove | null; fresh: boolean }
+  /**
+   * `fresh` is true only when a game starts (first game or rematch); reconnect snapshots are not fresh.
+   * `timeLeftMs` is how long the player on turn has before the server plays for them (includes a grace for
+   * animations; clients show at most TURN_MS), or null when no clock runs.
+   */
+  | { t: 'state'; state: GameState; lastMove: LastMove | null; fresh: boolean; timeLeftMs: number | null }
   | { t: 'error'; code: ErrorCode };
 
 const isInt = (x: unknown, min: number, max: number): x is number => Number.isInteger(x) && (x as number) >= min && (x as number) <= max;
