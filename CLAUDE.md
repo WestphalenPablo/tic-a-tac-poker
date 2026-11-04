@@ -17,3 +17,5 @@ Housekeeping: whenever `*:Zone.Identifier` files (Windows download markers) show
 Documentation: always document the work we do in MDs under `docs/` (what changed, where, why, how verified, what is not verified), and add new docs to the index in `docs/README.md`. Update the existing doc when extending earlier work.
 
 Commits: when Claude reaches a "finished" state for a prompt (work done, typecheck/tests pass), automatically commit it as atomic commits (one logical change each, split mixed files by hunk). Follow the global rule: user's git identity only, no Claude attribution or Co-Authored-By.
+
+Pushing: when the user authorizes a push to `master`, a GitHub Pages deploy follows. Monitor it after pushing (`gh run watch <id> --exit-status` in the background, then check the live site answers 200) and tell the user when it finishes, including if it fails. Don't wait to be asked.
