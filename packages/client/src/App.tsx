@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CardView } from './CardView';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
-import { playClip } from './sounds';
+import { playClip, useSoundBusy } from './sounds';
 import { useGamepad } from './useGamepad';
 import { useHandSounds } from './useHandSounds';
 
@@ -53,10 +53,12 @@ export function App() {
   const handsByPlayer = useMemo(() => ({ p1: scores.p1.hands, p2: scores.p2.hands }), [scores]);
   useHandSounds(handsByPlayer, lang);
   const myTurn = game.phase === 'playing' && game.current === HUMAN;
+  const soundBusy = useSoundBusy();
+  const canAct = myTurn && !soundBusy; // input waits for voice clips to finish
 
   // Bot plays after a short pause.
   useEffect(() => {
-    if (game.phase !== 'playing' || game.current === HUMAN) return;
+    if (game.phase !== 'playing' || game.current === HUMAN || soundBusy) return;
     const timer = setTimeout(() => {
       const move = chooseMove(game, level, rng.current);
       const what = game.pool[move.slot];
@@ -66,7 +68,7 @@ export function App() {
       setGame(applyMove(game, move, rng.current));
     }, 900);
     return () => clearTimeout(timer);
-  }, [game, level, t, lang]);
+  }, [game, level, t, lang, soundBusy]);
 
   const play = (slot: number, cell: number, as?: { rank: Rank; suit: Suit }) => {
     if (game.pool[slot] === 'JOKER') playClip(lang, 'joker', true);
@@ -75,7 +77,7 @@ export function App() {
   };
 
   const onPool = (slot: number) => {
-    if (!myTurn) return;
+    if (!canAct) return;
     const c = game.pool[slot];
     if (c == null) return;
     if (c === 'ROBBER') {
@@ -85,7 +87,7 @@ export function App() {
   };
 
   const onMyCell = (i: number) => {
-    if (!myTurn || !sel || game.grids[HUMAN][i]) return;
+    if (!canAct || !sel || game.grids[HUMAN][i]) return;
     if (sel.kind === 'steal') {
       if (sel.from === undefined) return;
       playClip(lang, 'steal', true);
@@ -96,7 +98,7 @@ export function App() {
   };
 
   const onTheirCell = (i: number) => {
-    if (myTurn && sel?.kind === 'steal' && game.grids[other(HUMAN)][i]) setSel({ ...sel, from: i });
+    if (canAct && sel?.kind === 'steal' && game.grids[other(HUMAN)][i]) setSel({ ...sel, from: i });
   };
 
   // Drag sources/targets (mouse). Touch and keyboard users keep the click flow.
@@ -162,7 +164,7 @@ export function App() {
         <Board who="p1" title={t('you')} color="you" game={game} scores={scores.p1} active={game.current === 'p1' && game.phase === 'playing'}
           onCell={onMyCell} focusIdx={focusAt('mine', cursor.idx) ? cursor.idx : -1} onDropCell={onMyCell} highlight={myTurn && !!sel && (sel.kind === 'place' || sel.from !== undefined)} />
         <div className="order-first col-span-2 flex flex-row flex-wrap justify-center gap-1.5 rounded-xl bg-sky-100 p-2 shadow-inner sm:gap-2 md:order-none md:col-span-1 md:flex-col md:flex-nowrap md:items-center">
-          {game.pool.map((c, i) => <CardView key={i} card={c} selected={sel?.slot === i} focused={focusAt('pool', i)} onClick={() => onPool(i)}
+          {game.pool.map((c, i) => <CardView card={c} selected={sel?.slot === i} focused={focusAt('pool', i)} onClick={() => onPool(i)}
             drag={myTurn && c != null ? { onDragStart: dragPool(i) } : undefined} />)}
         </div>
         <Board who="p2" title={t('bot')} color="bot" game={game} scores={scores.p2} active={game.current === 'p2' && game.phase === 'playing'}

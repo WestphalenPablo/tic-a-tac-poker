@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from 'react';
 import type { Lang } from './i18n';
 
 // Voice recordings per UI language. Languages without a folder stay silent.
@@ -8,20 +9,26 @@ export type Clip =
   | 'joker' | 'steal';
 
 type Playing = { audio: HTMLAudioElement; event: boolean };
-let current: Playing | null = null;
+let current: Playing | null = null; // set while a clip is playing or about to
 let pending: { url: string } | null = null;
+const listeners = new Set<() => void>();
+const notify = () => listeners.forEach((l) => l());
+
+function finish(audio: HTMLAudioElement) {
+  if (current?.audio !== audio) return; // already superseded
+  if (pending) start(pending.url, false);
+  else { current = null; notify(); }
+}
 
 function start(url: string, event: boolean) {
   current?.audio.pause();
   pending = null;
   const audio = new Audio(url);
-  audio.onended = () => {
-    if (current?.audio !== audio || !pending) return;
-    const next = pending;
-    start(next.url, false);
-  };
+  audio.onended = () => finish(audio);
+  audio.onerror = () => finish(audio); // missing file: don't leave the UI waiting
   current = { audio, event };
-  audio.play().catch(() => {}); // autoplay may be blocked before the first interaction
+  audio.play().catch(() => finish(audio)); // autoplay blocked: skip the clip rather than hang
+  notify();
 }
 
 /**
@@ -32,6 +39,14 @@ export function playClip(lang: Lang, clip: Clip, event = false) {
   const dir = SOUND_DIR[lang];
   if (!dir) return;
   const url = `/sounds/${dir}/${clip}.mp3`;
-  if (!event && current?.event && !current.audio.ended && !current.audio.paused) pending = { url };
+  if (!event && current?.event) pending = { url };
   else start(url, event);
+}
+
+/** True while a clip is playing or queued. The UI waits on this before accepting input or letting the bot move. */
+export function useSoundBusy() {
+  return useSyncExternalStore(
+    (cb) => { listeners.add(cb); return () => { listeners.delete(cb); }; },
+    () => current !== null,
+  );
 }

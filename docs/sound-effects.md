@@ -7,16 +7,18 @@ Added 2026-11-03. The client plays short spoken clips when hands are made and on
 | Clip | Plays when |
 |---|---|
 | `pair`, `flush`, `straight`, `three-of-a-kind`, `straight-flush`, `royal-flush` | A hand newly appears in either grid (new `line:type` key for that player). Several at once: only the highest-scoring one plays. A pair upgrading to three of a kind counts as new. Starting a new game plays nothing. |
-| `joker` | Anyone places a Joker (human: when the target cell is chosen, before the identity picker; bot: when it plays it). |
+| `joker` | Anyone places a Joker (human: when the identity picker is confirmed; bot: when it plays it). |
 | `steal` | Anyone completes a Robber move (human: when the stolen card is dropped; bot: when it robs you). |
 
 Priority (`src/sounds.ts`): event clips (`joker`, `steal`) cut off whatever is playing. Hand clips cut off other hand clips but wait for a playing event clip to finish, so the "robbed" clip isn't lost to the hand it forms.
 
-Autoplay may be blocked by the browser before the first interaction; `play()` failures are swallowed.
+The UI waits for clips: `useSoundBusy()` (in `sounds.ts`) is true while a clip is playing or queued. `App.tsx` ignores pool/cell clicks, drags and gamepad actions until it clears (`canAct`), and the bot's 900 ms move timer doesn't start until it clears. The status text and highlights still follow whose turn it is. "New game" is not blocked. A clip that errors (missing file) or is blocked by autoplay is treated as finished immediately, so the UI never hangs on audio.
+
+Autoplay may be blocked by the browser before the first interaction.
 
 ## Code
 
-- `packages/client/src/sounds.ts`: `playClip(lang, clip, event?)`, language-to-folder map (`pt-BR` -> `pt`), the priority rule.
+- `packages/client/src/sounds.ts`: `playClip(lang, clip, event?)`, `useSoundBusy()`, language-to-folder map (`pt-BR` -> `pt`), the priority rule.
 - `packages/client/src/useHandSounds.ts`: diffs the scored hands of both grids per render and calls `playClip`.
 - `packages/client/src/App.tsx`: calls `useHandSounds`, and `playClip` for Joker/steal in the bot effect, `play()` and `onMyCell`.
 - Assets: `packages/client/public/sounds/pt/*.mp3`, served at `/sounds/pt/<clip>.mp3`.
@@ -38,7 +40,7 @@ The `three-ofa-kind` source filename was fixed to `three-of-a-kind` in the outpu
 
 ## Not verified
 
-Checked with `pnpm typecheck`, `pnpm test`, and ffmpeg loudness/duration measurements. Not played in a browser, so clip audibility, timing against the 900 ms bot delay, and the event/hand queueing are untested by ear.
+Checked with `pnpm typecheck`, `pnpm test`, and ffmpeg loudness/duration measurements. Not played in a browser, so clip audibility, timing against the 900 ms bot delay, and the event/hand queueing, and the input/bot waiting are untested by ear.
 
 ## Open items
 
