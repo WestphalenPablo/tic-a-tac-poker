@@ -8,6 +8,8 @@
 - `packages/client/src/vite-env.d.ts`: Vite client types, needed for `import.meta.env`.
 - `.github/workflows/pages.yml`: install, typecheck, test, build, upload `packages/client/dist`, deploy. Node from `.nvmrc`, pnpm from `packageManager`.
 
+- `pnpm-workspace.yaml`: `allowBuilds: { esbuild: true }`. pnpm 12 fails `pnpm install` with `ERR_PNPM_IGNORED_BUILDS` unless esbuild's postinstall is approved; the first CI run died on this at the install step.
+
 **One-time setup (manual):** repo Settings → Pages → Source = GitHub Actions.
 
 **Why:** the game has no server, so a static host is enough.
