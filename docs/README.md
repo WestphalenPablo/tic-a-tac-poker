@@ -8,6 +8,7 @@ Working notes on what has been built and why. The master doc for rules and statu
 | [sound-effects.md](sound-effects.md) | Voice clips for hands/Joker/Robber, playback rules, ffmpeg pipeline |
 | [first-draw.md](first-draw.md) | Who-starts ritual: decisions, rule change, implementation plan and status |
 | [history.md](history.md) | Commit-by-commit timeline backfilled from git |
+| [v1.md](v1.md) | The `v1` tag: canonical baseline of the single-player MVP |
 
 ## Convention
 
