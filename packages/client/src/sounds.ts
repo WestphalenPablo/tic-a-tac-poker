@@ -38,7 +38,7 @@ function start(url: string, event: boolean) {
 export function playClip(lang: Lang, clip: Clip, event = false) {
   const dir = SOUND_DIR[lang];
   if (!dir) return;
-  const url = `/sounds/${dir}/${clip}.mp3`;
+  const url = `${import.meta.env.BASE_URL}sounds/${dir}/${clip}.mp3`;
   if (!event && current?.event) pending = { url };
   else start(url, event);
 }
