@@ -91,3 +91,7 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 ## Update banner
 
 **What:** open tabs show a "new version, Reload" banner after a deploy. Details in [update-banner.md](update-banner.md). **Verified:** `pnpm typecheck`, `pnpm build`. **Not verified:** in a browser.
+
+## PWA
+
+**What:** installable, offline-capable app with a custom icon (royal flush on a 3x3 board) and an install button/banner. Details in [pwa.md](pwa.md). **Verified:** `pnpm typecheck`, `pnpm build`, headless Chromium run (service worker, offline reload, install flow with a synthetic prompt event). **Not verified:** real installs, iOS, real-device icons.
