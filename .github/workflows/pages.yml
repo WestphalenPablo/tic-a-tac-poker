@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # version.json lists recent commits as release notes
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:

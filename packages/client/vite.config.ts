@@ -1,9 +1,19 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import { execSync } from 'node:child_process';
 import { defineConfig, type Plugin } from 'vite';
 
 // One id per build. Baked into the bundle and written to version.json so a running tab can tell it is stale.
 const BUILD_ID = String(Date.now());
+
+// Release notes = recent commit subjects, shipped in version.json. A tab running an older build lists the commits
+// newer than its own BUILD_COMMIT. Docs/housekeeping commits are left out: they mean nothing to a player.
+const NOISE = /^(Document|Note in|Canonize|Merge)\b/;
+const git = (args: string) => { try { return execSync(`git ${args}`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
+const BUILD_COMMIT = git('rev-parse HEAD');
+const COMMITS = git('log -n 30 --pretty=%H%x09%s').split('\n').filter(Boolean)
+  .map((l) => { const [sha = '', ...rest] = l.split('\t'); return { sha, subject: rest.join('\t') }; })
+  .filter((c) => c.sha === BUILD_COMMIT || !NOISE.test(c.subject)); // keep our own sha so the slice point is findable
 
 // Offline support. Emitted (not in public/) so the cache name carries the build id: every deploy changes sw.js
 // byte-for-byte, which makes the browser install the new worker, and `activate` drops the previous build's cache.
@@ -50,13 +60,13 @@ self.addEventListener('fetch', (e) => {
 const buildFiles = (): Plugin => ({
   name: 'tatp-build-files',
   generateBundle() {
-    this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ id: BUILD_ID }) });
+    this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ id: BUILD_ID, commit: BUILD_COMMIT, commits: COMMITS }) });
     this.emitFile({ type: 'asset', fileName: 'sw.js', source: swSource });
   },
 });
 
 export default defineConfig({
   base: '/tic-a-tac-poker/',
-  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID), __BUILD_COMMIT__: JSON.stringify(BUILD_COMMIT) },
   plugins: [react(), tailwindcss(), buildFiles()],
 });

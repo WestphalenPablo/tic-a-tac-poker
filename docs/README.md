@@ -17,7 +17,7 @@ Working notes on what has been built and why. The master doc for rules and statu
 | [online-rooms-ui.md](online-rooms-ui.md) | Client side of online play: flow, screens, snapshot handling, names, reconnect, how it was verified |
 | [pwa.md](pwa.md) | Installable app: custom royal-flush icon, manifest, offline service worker, install button and banner |
 | [drag-drop.md](drag-drop.md) | Pointer-event drag and drop (mouse + touch): ghost, hover feedback, tap vs drag, what is verified |
-| [update-banner.md](update-banner.md) | "New version available" banner for tabs left open across a Pages deploy: version.json polling |
+| [update-banner.md](update-banner.md) | "New version available" banner for tabs left open across a Pages deploy: version.json polling, View modal with commit-based release notes |
 | [multiplayer-server.md](multiplayer-server.md) | Decision: Node + `ws` server on Render, client stays on Pages (same repo, two hosts); open questions |
 
 ## Convention

@@ -109,3 +109,7 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 ## Voice mute button
 
 **What:** microphone button in the header toggles the mp3 voice clips (synthesized sfx keep playing); persisted in `localStorage`. Details in [sound-effects.md](sound-effects.md). **Verified:** `pnpm typecheck`, `pnpm test`. **Not verified:** in a browser.
+
+## Update banner: View + what's-new modal
+
+**What:** the update banner's button is now **View**; it opens a modal with the commit subjects added since the running build, and only that modal offers "OK, update me" / "Not now". Details in [update-banner.md](update-banner.md). **Verified:** `pnpm typecheck`, `pnpm test`, `pnpm build`, headless Chromium with a stubbed `version.json`. **Not verified:** CI full-history checkout until the deploy, real PWA, phone layout.
