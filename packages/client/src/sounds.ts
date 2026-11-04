@@ -14,14 +14,22 @@ let pending: { url: string } | null = null;
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());
 
-// Voice on/off, persisted. Only affects the mp3 clips; synthesized sfx (sfx.ts) always play.
-const VOICE_KEY = 'tatp.voice';
-let voiceOn = (() => { try { return localStorage.getItem(VOICE_KEY) !== 'off'; } catch { return true; } })();
+// Sound mode, persisted: 'on' = everything, 'voiceOff' = synthesized sfx only, 'mute' = nothing.
+export type SoundMode = 'on' | 'voiceOff' | 'mute';
+const VOICE_KEY = 'tatp.voice'; // legacy key; values 'on' | 'off' (= voiceOff) | 'mute'
+let mode: SoundMode = (() => {
+  try {
+    const v = localStorage.getItem(VOICE_KEY);
+    return v === 'off' ? 'voiceOff' : v === 'mute' ? 'mute' : 'on';
+  } catch { return 'on'; }
+})();
 
-export function setVoiceOn(on: boolean) {
-  voiceOn = on;
-  try { localStorage.setItem(VOICE_KEY, on ? 'on' : 'off'); } catch { /* storage unavailable */ }
-  if (!on) { // cut off anything playing so the UI doesn't wait on a silenced clip
+export const isMuted = () => mode === 'mute';
+
+export function setSoundMode(m: SoundMode) {
+  mode = m;
+  try { localStorage.setItem(VOICE_KEY, m === 'on' ? 'on' : m === 'voiceOff' ? 'off' : 'mute'); } catch { /* storage unavailable */ }
+  if (m !== 'on') { // cut off anything playing so the UI doesn't wait on a silenced clip
     const a = current?.audio;
     current = null; pending = null;
     a?.pause();
@@ -29,10 +37,10 @@ export function setVoiceOn(on: boolean) {
   notify();
 }
 
-export function useVoiceOn() {
+export function useSoundMode() {
   return useSyncExternalStore(
     (cb) => { listeners.add(cb); return () => { listeners.delete(cb); }; },
-    () => voiceOn,
+    () => mode,
   );
 }
 
@@ -59,7 +67,7 @@ function start(url: string, event: boolean) {
  */
 export function playClip(lang: Lang, clip: Clip, event = false) {
   const dir = SOUND_DIR[lang];
-  if (!dir || !voiceOn) return;
+  if (!dir || mode !== 'on') return;
   const url = `${import.meta.env.BASE_URL}sounds/${dir}/${clip}.mp3`;
   if (!event && current?.event) pending = { url };
   else start(url, event);

@@ -1,7 +1,10 @@
+import { isMuted } from './sounds';
+
 /** Tiny synthesized sound effects (no asset files). Silent if audio is unavailable or blocked. */
 
 let ctx: AudioContext | null = null;
 function audio(): AudioContext | null {
+  if (isMuted()) return null;
   try {
     ctx ??= new AudioContext();
     if (ctx.state === 'suspended') void ctx.resume().catch(() => {});

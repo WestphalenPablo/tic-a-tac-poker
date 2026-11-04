@@ -17,6 +17,8 @@ The Joker clip (`sounds/pt/joker.m4a`) was removed from playback on 2026-11-03: 
 
 **Mute button (2026-11-04):** a microphone button in the header (slashed when muted) turns the mp3 voice clips off. Synthesized effects in `sfx.ts` (flip, win, tie) are unaffected. State lives in `sounds.ts` (`setVoiceOn`, `useVoiceOn`), persisted in `localStorage` key `tatp.voice`. Muting stops the current clip and clears the queue, and `playClip` returns early, so `useSoundBusy()` clears and input never waits on a silenced clip. Labels are i18n keys `voiceOn`/`voiceOff`. Verified: `pnpm typecheck`, `pnpm test`. Not verified: in a browser, by ear.
 
+**Three-state sound button (2026-11-04):** the button now cycles on → voice clips off (one diagonal) → all muted (both diagonals, a full X) → on. Mute also silences the synthesized effects: `sfx.ts` `audio()` returns null when `isMuted()` (exported from `sounds.ts`). `setVoiceOn`/`useVoiceOn` were replaced by `setSoundMode`/`useSoundMode` (`'on' | 'voiceOff' | 'mute'`). The `tatp.voice` key stays compatible: `on`, `off` (voice off), new value `mute`. i18n key `soundMuted` added; `voiceOn`/`voiceOff` texts reworded. Verified: `pnpm typecheck`, `pnpm test`. Not verified: in a browser, by ear.
+
 Autoplay may be blocked by the browser before the first interaction.
 
 ## Code

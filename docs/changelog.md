@@ -113,3 +113,7 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 ## Update banner: View + what's-new modal
 
 **What:** the update banner's button is now **View**; it opens a modal with the commit subjects added since the running build, and only that modal offers "OK, update me" / "Not now". Details in [update-banner.md](update-banner.md). **Verified:** `pnpm typecheck`, `pnpm test`, `pnpm build`, headless Chromium with a stubbed `version.json`. **Not verified:** CI full-history checkout until the deploy, real PWA, phone layout.
+
+## Sound button: third state (total mute)
+
+- The header sound button cycles on → voice clips off → all muted (X over the mic). Details in [sound-effects.md](sound-effects.md).
