@@ -95,3 +95,7 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 ## PWA
 
 **What:** installable, offline-capable app with a custom icon (royal flush on a 3x3 board) and an install button/banner. Details in [pwa.md](pwa.md). **Verified:** `pnpm typecheck`, `pnpm build`, headless Chromium run (service worker, offline reload, install flow with a synthetic prompt event). **Not verified:** real installs, iOS, real-device icons.
+
+## Aligned boards on mobile
+
+**What:** on phones the two boards sit side by side, and the hand labels (e.g. "Three of a kind 90") that sat above the card grid wrapped to a different number of lines per board, pushing one grid down. The labels now sit **below** the grid, so both grids always start at the same height whatever the labels do; the extra height just makes one panel taller. Player names in the title row now truncate (`truncate`, score chip `shrink-0`) so a long online name can't wrap that row either. **Where:** `Board` in `packages/client/src/App.tsx`. **Verified:** `pnpm typecheck`; headless Chromium at 375px: grid tops equal (315 and 315) before and after injecting four long labels (three wrapped lines) into one board. **Not verified:** a real phone, long names in an online game; the labels now sitting under the grid is a visual change nobody has looked at.

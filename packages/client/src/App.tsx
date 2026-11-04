@@ -352,11 +352,8 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
   return (
     <section className={clsx('min-w-0 rounded-xl bg-white p-2 shadow sm:p-3', active && (color === 'you' ? 'ring-4 ring-you/50' : 'ring-4 ring-bot/50'))}>
       <div className="mb-2 flex items-center justify-between">
-        <span className={clsx('font-bold', color === 'you' ? 'text-you' : 'text-bot')}>{title}</span>
-        <span className="rounded-full bg-slate-800 px-3 py-0.5 font-mono text-base text-white sm:text-lg">{scores.total.toLocaleString(lang)}</span>
-      </div>
-      <div className="mb-2 flex min-h-6 flex-wrap gap-1 text-[11px]">
-        {scores.hands.map((h) => <span key={h.line} className="rounded bg-sky-100 px-1.5 py-0.5" title={h.line}>{t(`hand.${h.type}`)} {h.points}</span>)}
+        <span className={clsx('min-w-0 truncate font-bold', color === 'you' ? 'text-you' : 'text-bot')}>{title}</span>
+        <span className="ml-2 shrink-0 rounded-full bg-slate-800 px-3 py-0.5 font-mono text-base text-white sm:text-lg">{scores.total.toLocaleString(lang)}</span>
       </div>
       <div className="grid grid-cols-[repeat(3,auto)] justify-center gap-2 sm:gap-4">
         {game.grids[who].map((c, i) => (
@@ -368,6 +365,9 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
               }} />
           </div>
         ))}
+      </div>
+      <div className="mt-2 flex min-h-6 flex-wrap gap-1 text-[11px]">
+        {scores.hands.map((h) => <span key={h.line} className="rounded bg-sky-100 px-1.5 py-0.5" title={h.line}>{t(`hand.${h.type}`)} {h.points}</span>)}
       </div>
     </section>
   );
