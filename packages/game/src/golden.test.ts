@@ -25,7 +25,7 @@ describe('golden game 01', () => {
       current: fx.high_card_draw.winner as PlayerId,
       placementsLeft: 1,
       owed: { p1: 0, p2: 0 },
-      firstDraw: { p1: asCard(fx.high_card_draw.p1_card), p2: asCard(fx.high_card_draw.p2_card) },
+      firstDraws: [{ p1: asCard(fx.high_card_draw.p1_card), p2: asCard(fx.high_card_draw.p2_card) }],
     };
 
     for (const t of fx.turns) {

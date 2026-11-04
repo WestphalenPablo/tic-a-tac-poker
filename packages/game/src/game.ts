@@ -29,12 +29,14 @@ export function newGame(rng: Rng, mode: Mode = 'MSN'): GameState {
   }
   deck = shuffle([...deck, ...robbers], rng);
 
-  // High-card draw (cosmetic, from a separate plain deck); ties redraw.
+  // High-card draw (cosmetic, from a separate plain deck); equal ranks redraw.
   const plain = makeDeck('CLASSIC') as Card[];
+  const firstDraws: Record<PlayerId, Card>[] = [];
   let a: Card, b: Card;
   do {
     a = plain[Math.floor(rng() * plain.length)]!;
     b = plain[Math.floor(rng() * plain.length)]!;
+    firstDraws.push({ p1: a, p2: b });
   } while (rankHigh(a) === rankHigh(b));
 
   return {
@@ -46,7 +48,7 @@ export function newGame(rng: Rng, mode: Mode = 'MSN'): GameState {
     current: rankHigh(a) > rankHigh(b) ? 'p1' : 'p2',
     placementsLeft: 1,
     owed: { p1: 0, p2: 0 },
-    firstDraw: { p1: a, p2: b },
+    firstDraws,
   };
 }
 

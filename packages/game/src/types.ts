@@ -48,8 +48,8 @@ export interface GameState {
   placementsLeft: number;
   /** Extra placements owed to a player on their next turn (Robber compensation). */
   owed: Record<PlayerId, number>;
-  /** Opening high-card draw, for display. */
-  firstDraw: Record<PlayerId, Card>;
+  /** Opening high-card draw rounds, in order, for display. Equal ranks redraw; the last round decides. */
+  firstDraws: Record<PlayerId, Card>[];
 }
 
 export interface GameResult {
