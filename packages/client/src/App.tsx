@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { animateBotMove, cancelAnimations } from './animations';
 import { CardView } from './CardView';
+import { FirstDraw } from './FirstDraw';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
 import { playClip, useSoundBusy } from './sounds';
@@ -49,17 +50,20 @@ export function App() {
   const [cursor, setCursor] = useState<Cursor>({ zone: 'pool', idx: 0 });
   const [padUsed, setPadUsed] = useState(false); // show controller cursor only after pad input
 
-  const start = (m = mode) => { setGame(newGame(rng.current, m)); setSel(null); setJoker(null); setNote(''); };
+  const [intro, setIntro] = useState(true); // opening high-card draw ritual; holds input and the bot
+  const [gameId, setGameId] = useState(0); // remounts the ritual when a new game starts
+
+  const start = (m = mode) => { setGame(newGame(rng.current, m)); setSel(null); setJoker(null); setNote(''); setIntro(true); setGameId((n) => n + 1); };
   const scores = useMemo(() => ({ p1: scoreGrid(game.grids.p1), p2: scoreGrid(game.grids.p2) }), [game]);
   const handsByPlayer = useMemo(() => ({ p1: scores.p1.hands, p2: scores.p2.hands }), [scores]);
   useHandSounds(handsByPlayer, lang);
   const myTurn = game.phase === 'playing' && game.current === HUMAN;
   const soundBusy = useSoundBusy();
-  const canAct = myTurn && !soundBusy; // input waits for voice clips to finish
+  const canAct = myTurn && !soundBusy && !intro; // input waits for voice clips and the opening draw
 
   // Bot plays after a short pause.
   useEffect(() => {
-    if (game.phase !== 'playing' || game.current === HUMAN || soundBusy) return;
+    if (game.phase !== 'playing' || game.current === HUMAN || soundBusy || intro) return;
     let dead = false;
     const timer = setTimeout(() => {
       const move = chooseMove(game, level, rng.current);
@@ -76,7 +80,7 @@ export function App() {
       }, () => dead);
     }, 600);
     return () => { dead = true; clearTimeout(timer); cancelAnimations(); };
-  }, [game, level, t, lang, soundBusy]);
+  }, [game, level, t, lang, soundBusy, intro]);
 
   const play = (slot: number, cell: number, as?: { rank: Rank; suit: Suit }) => {
     if (game.pool[slot] === 'JOKER') playClip(lang, 'joker', true);
@@ -129,7 +133,7 @@ export function App() {
     setCursor(sel && empty >= 0 ? { zone: 'mine', idx: empty } : { zone: 'pool', idx: 0 });
   }, [canTheirs, cursor.zone, sel, game]);
   useGamepad((a) => {
-    if (joker !== null) return; // JokerPicker handles its own input
+    if (intro || joker !== null) return; // opening draw is not interactive; JokerPicker handles its own input
     if (res0) { if (a === 'a') start(); return; }
     setPadUsed(true);
     if (a === 'b') { setSel(null); return; }
@@ -178,6 +182,8 @@ export function App() {
         <Board who="p2" title={t('bot')} color="bot" game={game} scores={scores.p2} active={game.current === 'p2' && game.phase === 'playing'}
           onCell={onTheirCell} focusIdx={focusAt('theirs', cursor.idx) ? cursor.idx : -1} onDragCell={myTurn && sel?.kind === 'steal' ? dragTheirs : undefined} onDropCell={onTheirCell} highlight={myTurn && sel?.kind === 'steal' && sel.from === undefined} />
       </div>
+
+      {intro && <FirstDraw key={gameId} draws={game.firstDraws} starter={game.current} onDone={() => setIntro(false)} />}
 
       {joker !== null && sel && <JokerPicker onCancel={() => setJoker(null)} onConfirm={(as) => play(sel.slot, joker, as)} />}
 

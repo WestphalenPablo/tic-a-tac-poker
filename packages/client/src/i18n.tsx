@@ -21,6 +21,8 @@ const en = {
   draw: "It's a draw!", youWin: '🏆 You win!', botWins: 'The bot wins',
   summary: 'Match summary', points: 'Points', hands: 'Completed hands',
   jokerTitle: "Choose the Joker's card", cancel: 'Cancel', confirm: 'Confirm',
+  drawTitle: 'The highest card plays first!', drawTie: 'Tie! Drawing again…',
+  drawYouFirst: 'You play first', drawBotFirst: 'The bot plays first',
 };
 export type Key = keyof typeof en;
 
@@ -45,6 +47,8 @@ const ptBR: Record<Key, string> = {
   draw: 'Empate!', youWin: '🏆 Você venceu!', botWins: 'O bot venceu',
   summary: 'Resumo da partida', points: 'Pontos', hands: 'Mãos completas',
   jokerTitle: 'Escolha a carta do Coringa', cancel: 'Cancelar', confirm: 'Confirmar',
+  drawTitle: 'A carta mais alta joga primeiro!', drawTie: 'Empate! Sorteando de novo…',
+  drawYouFirst: 'Você joga primeiro', drawBotFirst: 'O bot joga primeiro',
 };
 
 export const LANGS = { en: 'English', 'pt-BR': 'Português (Brasil)' } as const;
