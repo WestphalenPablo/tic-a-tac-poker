@@ -4,6 +4,7 @@ import {
 } from '@tatp/game';
 import clsx from 'clsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { animateBotMove, cancelAnimations } from './animations';
 import { CardView } from './CardView';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
@@ -59,15 +60,22 @@ export function App() {
   // Bot plays after a short pause.
   useEffect(() => {
     if (game.phase !== 'playing' || game.current === HUMAN || soundBusy) return;
+    let dead = false;
     const timer = setTimeout(() => {
       const move = chooseMove(game, level, rng.current);
       const what = game.pool[move.slot];
-      if (move.type === 'STEAL') { setNote(t('noteRobbed')); playClip(lang, 'steal', true); }
-      else if (what === 'JOKER') { setNote(t('noteJoker')); playClip(lang, 'joker', true); }
+      const next = applyMove(game, move, rng.current);
+      if (move.type === 'STEAL') setNote(t('noteRobbed'));
+      else if (what === 'JOKER') setNote(t('noteJoker'));
       else setNote('');
-      setGame(applyMove(game, move, rng.current));
-    }, 900);
-    return () => clearTimeout(timer);
+      // Show the move first; the state change lands with the card, then the voice clip plays.
+      void animateBotMove(move, what === 'JOKER', () => {
+        if (move.type === 'STEAL') playClip(lang, 'steal', true);
+        else if (what === 'JOKER') playClip(lang, 'joker', true);
+        setGame(next);
+      }, () => dead);
+    }, 600);
+    return () => { dead = true; clearTimeout(timer); cancelAnimations(); };
   }, [game, level, t, lang, soundBusy]);
 
   const play = (slot: number, cell: number, as?: { rank: Rank; suit: Suit }) => {
@@ -164,8 +172,8 @@ export function App() {
         <Board who="p1" title={t('you')} color="you" game={game} scores={scores.p1} active={game.current === 'p1' && game.phase === 'playing'}
           onCell={onMyCell} focusIdx={focusAt('mine', cursor.idx) ? cursor.idx : -1} onDropCell={onMyCell} highlight={myTurn && !!sel && (sel.kind === 'place' || sel.from !== undefined)} />
         <div className="order-first col-span-2 flex flex-row flex-wrap justify-center gap-1.5 rounded-xl bg-sky-100 p-2 shadow-inner sm:gap-2 md:order-none md:col-span-1 md:flex-col md:flex-nowrap md:items-center">
-          {game.pool.map((c, i) => <CardView card={c} selected={sel?.slot === i} focused={focusAt('pool', i)} onClick={() => onPool(i)}
-            drag={myTurn && c != null ? { onDragStart: dragPool(i) } : undefined} />)}
+          {game.pool.map((c, i) => <div key={i} data-pool={i}><CardView card={c} selected={sel?.slot === i} focused={focusAt('pool', i)} onClick={() => onPool(i)}
+            drag={myTurn && c != null ? { onDragStart: dragPool(i) } : undefined} /></div>)}
         </div>
         <Board who="p2" title={t('bot')} color="bot" game={game} scores={scores.p2} active={game.current === 'p2' && game.phase === 'playing'}
           onCell={onTheirCell} focusIdx={focusAt('theirs', cursor.idx) ? cursor.idx : -1} onDragCell={myTurn && sel?.kind === 'steal' ? dragTheirs : undefined} onDropCell={onTheirCell} highlight={myTurn && sel?.kind === 'steal' && sel.from === undefined} />
@@ -211,7 +219,7 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
       </div>
       <div className="grid grid-cols-3 justify-items-center gap-1 sm:gap-1.5">
         {game.grids[who].map((c, i) => (
-          <div key={i} className={clsx(highlight && (who === 'p1' ? !c : !!c) && 'rounded-lg ring-2 ring-amber-400')}>
+          <div key={i} data-cell={`${who}-${i}`} className={clsx(highlight && (who === 'p1' ? !c : !!c) && 'rounded-lg ring-2 ring-amber-400')}>
             <CardView small card={c} focused={focusIdx === i} onClick={() => onCell(i)}
               drag={{
                 onDragStart: onDragCell && c ? onDragCell(i) : undefined,

@@ -37,3 +37,16 @@ Drag and drop, controller input and the breakpoints were checked with `pnpm type
 ## Sound effects
 
 Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.md](sound-effects.md).
+
+## Bot move animations
+
+**What:** the bot's moves are no longer instant.
+- Place: the chosen pool card pops, lifts out of the pool and flies to the target cell, then the cell pops.
+- Joker: same flight but spinning with a magenta glow; the cell flashes bright and wobbles on landing.
+- Robber: the Robber flies to the victim's card, the card shakes, then it is carried (red glow) to the bot's board.
+
+**Where:** `packages/client/src/animations.ts` (`animateBotMove`, Web Animations API on cloned DOM nodes); `App.tsx` bot effect calls it and applies the move (and plays the Joker/Robber voice clip) when the card lands. Pool slots and grid cells carry `data-pool` / `data-cell` attributes used to find positions.
+
+**Why DOM-driven:** game state stays a pure reducer; state changes only at landing, so the old board is visible during the flight.
+
+**Verified:** `pnpm typecheck`. **Not verified:** visual feel/timing in a browser (pop 450ms + fly 650–800ms, steal ≈ 1.8s total), mobile layout, reduced-motion handling (none added).
