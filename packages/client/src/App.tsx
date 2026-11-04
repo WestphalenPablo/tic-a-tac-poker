@@ -223,7 +223,7 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
       <div className="mb-2 flex min-h-6 flex-wrap gap-1 text-[11px]">
         {scores.hands.map((h) => <span key={h.line} className="rounded bg-sky-100 px-1.5 py-0.5" title={h.line}>{t(`hand.${h.type}`)} {h.points}</span>)}
       </div>
-      <div className="grid grid-cols-3 justify-items-center gap-1 sm:gap-1.5">
+      <div className="grid grid-cols-[repeat(3,auto)] justify-center gap-1 sm:gap-1.5">
         {game.grids[who].map((c, i) => (
           <div key={i} data-cell={`${who}-${i}`} className={clsx(highlight && (who === 'p1' ? !c : !!c) && 'rounded-lg ring-2 ring-amber-400')}>
             <CardView small card={c} focused={focusIdx === i} onClick={() => onCell(i)}
