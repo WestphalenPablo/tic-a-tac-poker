@@ -120,10 +120,10 @@ export function App() {
   const focusAt = (zone: Zone, i: number) => padUsed && cursor.zone === zone && cursor.idx === i;
 
   return (
-    <div className="mx-auto max-w-4xl p-4" onPointerDown={() => setPadUsed(false)}>
-      <header className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gradient-to-r from-msn to-sky-400 px-4 py-2 text-white shadow">
-        <h1 className="text-xl font-extrabold tracking-tight">{t('title')}</h1>
-        <div className="flex gap-3 text-sm">
+    <div className="mx-auto max-w-4xl p-2 sm:p-4" onPointerDown={() => setPadUsed(false)}>
+      <header className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gradient-to-r from-msn to-sky-400 px-3 py-2 text-white shadow sm:mb-4 sm:px-4">
+        <h1 className="text-lg font-extrabold sm:text-xl tracking-tight">{t('title')}</h1>
+        <div className="flex flex-wrap gap-2 text-xs sm:gap-3 sm:text-sm">
           <select className="rounded bg-white/20 px-2 py-1" value={mode} onChange={(e) => { const m = e.target.value as Mode; setMode(m); start(m); }}>
             <option value="MSN" className="text-black">{t('modeMsn')}</option>
             <option value="CLASSIC" className="text-black">{t('modeClassic')}</option>
@@ -139,14 +139,15 @@ export function App() {
         </div>
       </header>
 
-      <div className="mb-3 rounded-full bg-white px-4 py-2 text-center text-sm font-medium shadow-sm">
+      <div className="mb-3 rounded-full bg-white px-3 py-2 text-center text-xs sm:px-4 sm:text-sm font-medium shadow-sm">
         {status}{note && <span className="ml-3 text-slate-500">{note}</span>}
       </div>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4">
+      {/* <md: pool row on top, two boards below. md+: boards flank a vertical pool. */}
+      <div className="grid grid-cols-2 items-start gap-2 sm:gap-4 md:grid-cols-[1fr_auto_1fr]">
         <Board who="p1" title={t('you')} color="you" game={game} scores={scores.p1} active={game.current === 'p1' && game.phase === 'playing'}
           onCell={onMyCell} focusIdx={focusAt('mine', cursor.idx) ? cursor.idx : -1} onDropCell={onMyCell} highlight={myTurn && !!sel && (sel.kind === 'place' || sel.from !== undefined)} />
-        <div className="flex flex-col items-center gap-2 rounded-xl bg-sky-100 p-2 shadow-inner">
+        <div className="order-first col-span-2 flex flex-row flex-wrap justify-center gap-1.5 rounded-xl bg-sky-100 p-2 shadow-inner sm:gap-2 md:order-none md:col-span-1 md:flex-col md:flex-nowrap md:items-center">
           {game.pool.map((c, i) => <CardView key={i} card={c} selected={sel?.slot === i} focused={focusAt('pool', i)} onClick={() => onPool(i)}
             drag={myTurn && c != null ? { onDragStart: dragPool(i) } : undefined} />)}
         </div>
@@ -158,7 +159,7 @@ export function App() {
 
       {res && (
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/40">
-          <div className="w-96 rounded-xl bg-white p-6 text-center shadow-xl">
+          <div className="w-[90vw] max-w-sm rounded-xl bg-white p-6 text-center shadow-xl">
             <h2 className="mb-1 text-2xl font-extrabold">{res.winner === 'draw' ? t('draw') : res.winner === HUMAN ? t('youWin') : t('botWins')}</h2>
             <p className="mb-4 text-sm text-slate-500">{t('summary')}</p>
             <table className="mb-5 w-full text-sm">
@@ -184,15 +185,15 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
 }) {
   const { t, lang } = useI18n();
   return (
-    <section className={clsx('rounded-xl bg-white p-3 shadow', active && (color === 'you' ? 'ring-4 ring-you/50' : 'ring-4 ring-bot/50'))}>
+    <section className={clsx('min-w-0 rounded-xl bg-white p-2 shadow sm:p-3', active && (color === 'you' ? 'ring-4 ring-you/50' : 'ring-4 ring-bot/50'))}>
       <div className="mb-2 flex items-center justify-between">
         <span className={clsx('font-bold', color === 'you' ? 'text-you' : 'text-bot')}>{title}</span>
-        <span className="rounded-full bg-slate-800 px-3 py-0.5 font-mono text-lg text-white">{scores.total.toLocaleString(lang)}</span>
+        <span className="rounded-full bg-slate-800 px-3 py-0.5 font-mono text-base text-white sm:text-lg">{scores.total.toLocaleString(lang)}</span>
       </div>
       <div className="mb-2 flex min-h-6 flex-wrap gap-1 text-[11px]">
         {scores.hands.map((h) => <span key={h.line} className="rounded bg-sky-100 px-1.5 py-0.5" title={h.line}>{t(`hand.${h.type}`)} {h.points}</span>)}
       </div>
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-3 justify-items-center gap-1 sm:gap-1.5">
         {game.grids[who].map((c, i) => (
           <div key={i} className={clsx(highlight && (who === 'p1' ? !c : !!c) && 'rounded-lg ring-2 ring-amber-400')}>
             <CardView small card={c} focused={focusIdx === i} onClick={() => onCell(i)}

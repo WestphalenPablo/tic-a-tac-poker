@@ -20,7 +20,7 @@ export function JokerPicker({ onConfirm, onCancel }: { onConfirm: (as: { rank: R
   });
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/40">
-      <div className="w-96 rounded-xl bg-white p-5 shadow-xl">
+      <div className="w-[90vw] max-w-sm rounded-xl bg-white p-4 sm:p-5 shadow-xl">
         <h2 className="mb-3 text-lg font-bold">{t('jokerTitle')}</h2>
         <div className="mb-3 flex justify-center"><CardView card={{ rank, suit, joker: true }} /></div>
         <div className="mb-3 flex justify-center gap-2">
@@ -30,7 +30,7 @@ export function JokerPicker({ onConfirm, onCancel }: { onConfirm: (as: { rank: R
         </div>
         <div className="mb-4 flex flex-wrap justify-center gap-1">
           {RANKS.map((r) => (
-            <button key={r} onClick={() => setRank(r)} className={clsx('h-9 w-9 rounded border text-sm font-semibold', rank === r ? 'border-msn bg-sky-100' : 'border-slate-300')}>{r}</button>
+            <button key={r} onClick={() => setRank(r)} className={clsx('h-8 w-8 rounded border text-sm sm:h-9 sm:w-9 font-semibold', rank === r ? 'border-msn bg-sky-100' : 'border-slate-300')}>{r}</button>
           ))}
         </div>
         <div className="flex justify-end gap-2">

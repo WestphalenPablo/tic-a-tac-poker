@@ -13,9 +13,10 @@ export function CardView({
   drag?: { onDragStart?: () => void; onDrop?: () => void; onDragEnd?: () => void };
 }) {
   const { t } = useI18n();
-  const size = small ? 'h-20 w-14 text-xl' : 'h-24 w-[4.25rem] text-2xl';
+  // Compact on phones (<640px), original sizes from sm up.
+  const size = small ? 'h-16 w-11 text-base sm:h-20 sm:w-14 sm:text-xl' : 'h-[4.5rem] w-12 text-lg sm:h-24 sm:w-[4.25rem] sm:text-2xl';
   const base = clsx(
-    'relative flex flex-col items-start justify-between rounded-lg border p-1.5 font-bold leading-none select-none',
+    'relative flex flex-col items-start justify-between rounded-lg border p-1 sm:p-1.5 font-bold leading-none select-none',
     size, onClick && 'cursor-pointer transition hover:-translate-y-0.5', selected && 'ring-4 ring-msn', focused && 'outline outline-4 outline-offset-2 outline-fuchsia-500',
     drag?.onDragStart && 'cursor-grab active:cursor-grabbing',
   );
@@ -29,16 +30,16 @@ export function CardView({
   };
   if (card === null) return <div className={clsx(base, 'border-dashed border-sky-200 bg-sky-50/60')} {...dnd} />;
   if (card === 'ROBBER')
-    return <div className={clsx(base, 'items-center justify-center border-slate-700 bg-slate-800 text-3xl')} {...dnd}>🦹<span className="text-[10px] font-semibold text-white">{t('robber')}</span></div>;
+    return <div className={clsx(base, 'items-center justify-center border-slate-700 bg-slate-800 text-2xl sm:text-3xl')} {...dnd}>🦹<span className="text-[10px] font-semibold text-white">{t('robber')}</span></div>;
   if (card === 'JOKER')
-    return <div className={clsx(base, 'items-center justify-center border-fuchsia-400 bg-gradient-to-br from-fuchsia-100 to-amber-100 text-3xl')} {...dnd}>🃏<span className="text-[10px] font-semibold text-fuchsia-700">{t('joker')}</span></div>;
+    return <div className={clsx(base, 'items-center justify-center border-fuchsia-400 bg-gradient-to-br from-fuchsia-100 to-amber-100 text-2xl sm:text-3xl')} {...dnd}>🃏<span className="text-[10px] font-semibold text-fuchsia-700">{t('joker')}</span></div>;
   return (
     <div
       className={clsx(base, 'bg-white shadow-sm', RED.has(card.suit) ? 'text-red-600' : 'text-slate-900', card.joker ? 'border-fuchsia-400 bg-fuchsia-50' : 'border-slate-300')}
       {...dnd}
     >
       <span>{card.rank}</span>
-      <span className="self-end text-3xl">{SUIT[card.suit]}</span>
+      <span className="self-end text-2xl sm:text-3xl">{SUIT[card.suit]}</span>
       {card.joker && <span className="absolute right-1 top-0.5 text-xs">🃏</span>}
     </div>
   );
