@@ -41,7 +41,7 @@ legacy/            original research, specs and footage
 
 ## The rules, as implemented
 
-**Setup.** 52-card deck, plus 2 Jokers and 2 Robbers in MSN mode (56 cards). 5 face-up pool slots, dealt with no Robber. Each side gets a random card; the higher rank (Ace high) plays first, ties redraw.
+**Setup.** 52-card deck, plus 2 Jokers and 2 Robbers in MSN mode (56 cards). 5 face-up pool slots, dealt with no Robber. Before the first turn each side draws one card from a separate plain deck; the higher rank (Ace high) plays first. Only rank counts, never suit. On equal ranks both draw again, until one is higher. Every draw round is recorded in order (`firstDraws`, last entry decides), so the UI can show each redraw. The draw is cosmetic: it does not affect the deck or the pool.
 
 **Turn.** Draft one pool card and place it on an empty cell of your own grid. The vacated slot refills in place from the deck. Play then passes.
 
