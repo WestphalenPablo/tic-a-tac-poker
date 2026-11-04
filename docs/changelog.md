@@ -62,3 +62,7 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 **Where:** `packages/client/src/App.tsx` (`useState<Difficulty>('easy')`).
 
 **Verified:** `pnpm typecheck`. **Not verified:** in the browser.
+
+## Welcome / tutorial wizard
+
+**What:** 5-step help modal shown on first launch and via the `?` header button. Details in [tutorial.md](tutorial.md).

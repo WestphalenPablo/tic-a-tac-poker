@@ -10,6 +10,7 @@ Working notes on what has been built and why. The master doc for rules and statu
 | [history.md](history.md) | Commit-by-commit timeline backfilled from git |
 | [v1.md](v1.md) | The `v1` tag: canonical baseline of the single-player MVP |
 | [github-pages.md](github-pages.md) | Static deploy to GitHub Pages: base path, sound URLs, workflow |
+| [tutorial.md](tutorial.md) | Welcome/tutorial wizard modal: first launch, `?` button, input gating |
 
 ## Convention
 
