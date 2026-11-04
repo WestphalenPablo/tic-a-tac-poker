@@ -1,4 +1,4 @@
-import { LINES, type ScoredHand } from '@tatp/game';
+import { LINES, type Grid, type ScoredHand } from '@tatp/game';
 import { useEffect, useRef, useState } from 'react';
 
 export const REVEAL_MS = 900;
@@ -8,7 +8,7 @@ export const REVEAL_MS = 900;
  * shown (or an empty set). Hands present on first render are not animated. Hands made in the same
  * move (e.g. one card completing a row and a column) are queued and shown in turn.
  */
-export function useHandReveal(hands: ScoredHand[]): { cells: ReadonlySet<number>; key: string | null } {
+export function useHandReveal(hands: ScoredHand[], grid: Grid): { cells: ReadonlySet<number>; key: string | null } {
   const seen = useRef<Set<string> | null>(null);
   const queue = useRef<string[]>([]);
   const [active, setActive] = useState<string | null>(null);
@@ -41,6 +41,16 @@ export function useHandReveal(hands: ScoredHand[]): { cells: ReadonlySet<number>
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const cells = new Set(active ? (LINES.find((l) => l.name === active)?.cells ?? []) : []);
+  const cells = new Set<number>();
+  const hand = hands.find((h) => h.line === active);
+  const line = LINES.find((l) => l.name === active);
+  if (hand && line) {
+    for (const i of line.cells) {
+      const c = grid[i];
+      if (!c) continue;
+      // A pair only involves the two matching cards; every other hand uses all three.
+      if (hand.type !== 'PAIR' || line.cells.some((o) => o !== i && grid[o]?.rank === c.rank)) cells.add(i);
+    }
+  }
   return { cells, key: active };
 }

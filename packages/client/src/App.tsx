@@ -346,7 +346,7 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
   onDragCell?: (i: number) => () => void; onDropCell: (i: number) => void;
 }) {
   const { t, lang } = useI18n();
-  const reveal = useHandReveal(scores.hands);
+  const reveal = useHandReveal(scores.hands, game.grids[who]);
   return (
     <section className={clsx('min-w-0 rounded-xl bg-white p-2 shadow sm:p-3', active && (color === 'you' ? 'ring-4 ring-you/50' : 'ring-4 ring-bot/50'))}>
       <div className="mb-2 flex items-center justify-between">
