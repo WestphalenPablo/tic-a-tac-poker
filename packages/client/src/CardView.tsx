@@ -35,12 +35,11 @@ export function CardView({
     return <div className={clsx(base, 'items-center justify-center border-fuchsia-400 bg-gradient-to-br from-fuchsia-100 to-amber-100 text-2xl sm:text-3xl')} {...dnd}>🃏<span className="text-[10px] font-semibold text-fuchsia-700">{t('joker')}</span></div>;
   return (
     <div
-      className={clsx(base, 'bg-white shadow-sm', RED.has(card.suit) ? 'text-red-600' : 'text-slate-900', 'border-slate-300', card.joker && 'bg-fuchsia-50')}
+      className={clsx(base, 'bg-white shadow-sm', RED.has(card.suit) ? 'text-red-600' : 'text-slate-900', 'border-slate-300')}
       {...dnd}
     >
       <span>{card.rank}</span>
       <span className="self-end text-2xl sm:text-3xl">{SUIT[card.suit]}</span>
-      {card.joker && <span className="absolute right-1 top-0.5 text-xs">🃏</span>}
     </div>
   );
 }
