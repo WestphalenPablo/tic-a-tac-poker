@@ -14,7 +14,7 @@ import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
 import { MenuModal, NamePrompt, NoticeModal, RoomModal, saveName } from './Lobby';
 import { getRoomId, roomUrl, showHomeInUrl, showRoomInUrl } from './route';
-import { playClip, useSoundBusy } from './sounds';
+import { playClip, setVoiceOn, useSoundBusy, useVoiceOn } from './sounds';
 import { playFlip } from './sfx';
 import { markTutorialSeen, seenTutorial, Tutorial } from './Tutorial';
 import { useGamepad } from './useGamepad';
@@ -88,6 +88,7 @@ export function App() {
   useHandSounds(handsByPlayer, lang);
   const myTurn = game.phase === 'playing' && game.current === HUMAN;
   const soundBusy = useSoundBusy();
+  const voiceOn = useVoiceOn();
   const canAct = myTurn && inGame && !soundBusy && !intro && !help && !awaiting && (!online || room.link === 'open'); // input waits for voice clips and the opening draw
 
   // Bot plays after a short pause.
@@ -273,6 +274,13 @@ export function App() {
             {(Object.keys(LANGS) as Lang[]).map((l) => <option key={l} value={l} className="text-black">{LANGS[l]}</option>)}
           </select>
           <button aria-label={t('howToPlay')} title={t('howToPlay')} className="rounded bg-white/25 px-3 py-1 font-semibold hover:bg-white/40" onClick={() => setHelp(true)}>?</button>
+          <button aria-label={t(voiceOn ? 'voiceOn' : 'voiceOff')} aria-pressed={!voiceOn} title={t(voiceOn ? 'voiceOn' : 'voiceOff')} className="rounded bg-white/25 px-3 py-1 hover:bg-white/40" onClick={() => setVoiceOn(!voiceOn)}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="9" y="2" width="6" height="12" rx="3" />
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8" />
+              {!voiceOn && <path d="M3 3l18 18" />}
+            </svg>
+          </button>
           <InstallButton />
           <button className="rounded bg-white/25 px-3 py-1 font-semibold hover:bg-white/40" onClick={askMenu}>{t('newGame')}</button>
         </div>

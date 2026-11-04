@@ -105,3 +105,7 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 ## Pointer-event drag and drop (mouse + touch)
 
 **What:** drag and drop rewritten on Pointer Events so it works with mouse, touch and pen, with a floating ghost card and hover feedback. Details in [drag-drop.md](drag-drop.md). **Verified:** `pnpm typecheck`, `pnpm test`, headless Chromium with mouse and with real CDP touch events. **Not verified:** real iOS Safari / Android devices, haptics, the Robber two-step flow in a browser.
+
+## Voice mute button
+
+**What:** microphone button in the header toggles the mp3 voice clips (synthesized sfx keep playing); persisted in `localStorage`. Details in [sound-effects.md](sound-effects.md). **Verified:** `pnpm typecheck`, `pnpm test`. **Not verified:** in a browser.

@@ -15,6 +15,8 @@ The UI waits for clips: `useSoundBusy()` (in `sounds.ts`) is true while a clip i
 
 The Joker clip (`sounds/pt/joker.m4a`) was removed from playback on 2026-11-03: the code no longer plays it (the files `sounds/pt/joker.m4a` and `public/sounds/pt/joker.mp3` are left in place, unused).
 
+**Mute button (2026-11-04):** a microphone button in the header (slashed when muted) turns the mp3 voice clips off. Synthesized effects in `sfx.ts` (flip, win, tie) are unaffected. State lives in `sounds.ts` (`setVoiceOn`, `useVoiceOn`), persisted in `localStorage` key `tatp.voice`. Muting stops the current clip and clears the queue, and `playClip` returns early, so `useSoundBusy()` clears and input never waits on a silenced clip. Labels are i18n keys `voiceOn`/`voiceOff`. Verified: `pnpm typecheck`, `pnpm test`. Not verified: in a browser, by ear.
+
 Autoplay may be blocked by the browser before the first interaction.
 
 ## Code
