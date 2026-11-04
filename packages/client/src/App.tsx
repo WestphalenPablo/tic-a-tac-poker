@@ -10,6 +10,7 @@ import { FirstDraw } from './FirstDraw';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
 import { playClip, useSoundBusy } from './sounds';
+import { markTutorialSeen, seenTutorial, Tutorial } from './Tutorial';
 import { useGamepad } from './useGamepad';
 import { useHandSounds } from './useHandSounds';
 
@@ -51,6 +52,8 @@ export function App() {
   const [padUsed, setPadUsed] = useState(false); // show controller cursor only after pad input
 
   const [intro, setIntro] = useState(true); // opening high-card draw ritual; holds input and the bot
+  const [help, setHelp] = useState(() => !seenTutorial()); // welcome/tutorial modal; also pauses input and the bot
+  const closeHelp = () => { markTutorialSeen(); setHelp(false); };
   const [gameId, setGameId] = useState(0); // remounts the ritual when a new game starts
 
   const start = (m = mode) => { setGame(newGame(rng.current, m)); setSel(null); setJoker(null); setNote(''); setIntro(true); setGameId((n) => n + 1); };
@@ -59,11 +62,11 @@ export function App() {
   useHandSounds(handsByPlayer, lang);
   const myTurn = game.phase === 'playing' && game.current === HUMAN;
   const soundBusy = useSoundBusy();
-  const canAct = myTurn && !soundBusy && !intro; // input waits for voice clips and the opening draw
+  const canAct = myTurn && !soundBusy && !intro && !help; // input waits for voice clips and the opening draw
 
   // Bot plays after a short pause.
   useEffect(() => {
-    if (game.phase !== 'playing' || game.current === HUMAN || soundBusy || intro) return;
+    if (game.phase !== 'playing' || game.current === HUMAN || soundBusy || intro || help) return;
     let dead = false;
     const timer = setTimeout(() => {
       const move = chooseMove(game, level, rng.current);
@@ -79,7 +82,7 @@ export function App() {
       }, () => dead);
     }, 600);
     return () => { dead = true; clearTimeout(timer); cancelAnimations(); };
-  }, [game, level, t, lang, soundBusy, intro]);
+  }, [game, level, t, lang, soundBusy, intro, help]);
 
   const play = (slot: number, cell: number, as?: { rank: Rank; suit: Suit }) => {
     setGame(applyMove(game, { type: 'PLACE', slot, cell, as }, rng.current));
@@ -131,7 +134,7 @@ export function App() {
     setCursor(sel && empty >= 0 ? { zone: 'mine', idx: empty } : { zone: 'pool', idx: 0 });
   }, [canTheirs, cursor.zone, sel, game]);
   useGamepad((a) => {
-    if (intro || joker !== null) return; // opening draw is not interactive; JokerPicker handles its own input
+    if (help || intro || joker !== null) return; // opening draw is not interactive; JokerPicker handles its own input
     if (res0) { if (a === 'a') start(); return; }
     setPadUsed(true);
     if (a === 'b') { setSel(null); return; }
@@ -161,6 +164,7 @@ export function App() {
           <select aria-label={t('language')} className="rounded bg-white/20 px-2 py-1" value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
             {(Object.keys(LANGS) as Lang[]).map((l) => <option key={l} value={l} className="text-black">{LANGS[l]}</option>)}
           </select>
+          <button aria-label={t('howToPlay')} title={t('howToPlay')} className="rounded bg-white/25 px-3 py-1 font-semibold hover:bg-white/40" onClick={() => setHelp(true)}>?</button>
           <button className="rounded bg-white/25 px-3 py-1 font-semibold hover:bg-white/40" onClick={() => start()}>{t('newGame')}</button>
         </div>
       </header>
@@ -181,7 +185,9 @@ export function App() {
           onCell={onTheirCell} focusIdx={focusAt('theirs', cursor.idx) ? cursor.idx : -1} onDragCell={myTurn && sel?.kind === 'steal' ? dragTheirs : undefined} onDropCell={onTheirCell} highlight={myTurn && sel?.kind === 'steal' && sel.from === undefined} />
       </div>
 
-      {intro && <FirstDraw key={gameId} draws={game.firstDraws} starter={game.current} onDone={() => setIntro(false)} />}
+      {help && <Tutorial onClose={closeHelp} />}
+
+      {intro && !help && <FirstDraw key={gameId} draws={game.firstDraws} starter={game.current} onDone={() => setIntro(false)} />}
 
       {joker !== null && sel && <JokerPicker onCancel={() => setJoker(null)} onConfirm={(as) => play(sel.slot, joker, as)} />}
 
