@@ -8,6 +8,7 @@ import { animateBotMove, cancelAnimations } from './animations';
 import { CardView } from './CardView';
 import { SERVER_URL, wakeServer } from './config';
 import { FirstDraw } from './FirstDraw';
+import { useDragCtx } from './useDrag';
 import { InstallButton } from './InstallPrompt';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
@@ -195,7 +196,7 @@ export function App() {
     if (canAct && sel?.kind === 'steal' && game.grids[other(HUMAN)][i]) setSel({ ...sel, from: i });
   };
 
-  // Drag sources/targets (mouse). Touch and keyboard users keep the click flow.
+  // Drag sources/targets (pointer events: mouse, touch, pen). A press that doesn't move stays a click; the gamepad uses the same handlers.
   const dragPool = (slot: number) => () => onPool(slot);
   const dragTheirs = (i: number) => () => onTheirCell(i);
 
@@ -287,7 +288,7 @@ export function App() {
           onCell={onMyCell} focusIdx={focusAt('mine', cursor.idx) ? cursor.idx : -1} onDropCell={onMyCell} highlight={myTurn && !!sel && (sel.kind === 'place' || sel.from !== undefined)} />
         <div className="order-first col-span-2 flex flex-row flex-wrap justify-center gap-1.5 rounded-xl bg-sky-100 p-2 shadow-inner sm:gap-2 md:order-none md:col-span-1 md:flex-col md:flex-nowrap md:items-center">
           {game.pool.map((c, i) => <div key={i} data-pool={i}><CardView card={c} selected={sel?.slot === i} focused={focusAt('pool', i)} onClick={() => onPool(i)}
-            drag={myTurn && c != null ? { onDragStart: dragPool(i) } : undefined} /></div>)}
+            drag={myTurn && c != null ? { id: `pool-${i}`, onStart: dragPool(i) } : undefined} /></div>)}
         </div>
         <Board who="p2" title={oppName} color="bot" game={game} scores={scores.p2} active={game.current === 'p2' && game.phase === 'playing'}
           onCell={onTheirCell} focusIdx={focusAt('theirs', cursor.idx) ? cursor.idx : -1} onDragCell={myTurn && sel?.kind === 'steal' ? dragTheirs : undefined} onDropCell={onTheirCell} highlight={myTurn && sel?.kind === 'steal' && sel.from === undefined} />
@@ -348,6 +349,7 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
   onDragCell?: (i: number) => () => void; onDropCell: (i: number) => void;
 }) {
   const { t, lang } = useI18n();
+  const dragging = !!useDragCtx().active;
   const reveal = useHandReveal(scores.hands, game.grids[who]);
   return (
     <section className={clsx('min-w-0 rounded-xl bg-white p-2 shadow sm:p-3', active && (color === 'you' ? 'ring-4 ring-you/50' : 'ring-4 ring-bot/50'))}>
@@ -356,15 +358,16 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
         <span className="ml-2 shrink-0 rounded-full bg-slate-800 px-3 py-0.5 font-mono text-base text-white sm:text-lg">{scores.total.toLocaleString(lang)}</span>
       </div>
       <div className="grid grid-cols-[repeat(3,auto)] justify-center gap-2 sm:gap-4">
-        {game.grids[who].map((c, i) => (
-          <div key={reveal.cells.has(i) ? `${i}-${reveal.key}` : i} data-cell={`${who}-${i}`} className={clsx('rounded-lg', highlight && (who === 'p1' ? !c : !!c) && 'ring-2 ring-amber-400', reveal.cells.has(i) && 'hand-reveal')}>
-            <CardView small card={c} focused={focusIdx === i} onClick={() => onCell(i)}
-              drag={{
-                onDragStart: onDragCell && c ? onDragCell(i) : undefined,
-                onDrop: () => onDropCell(i),
-              }} />
-          </div>
-        ))}
+        {game.grids[who].map((c, i) => {
+          const open = highlight && (who === 'p1' ? !c : !!c); // same predicate as the amber ring: a valid drop right now
+          return (
+            <div key={reveal.cells.has(i) ? `${i}-${reveal.key}` : i} data-cell={`${who}-${i}`}
+              className={clsx('rounded-lg', open && (dragging ? 'ring-2 ring-amber-300/70 motion-safe:animate-pulse' : 'ring-2 ring-amber-400'), reveal.cells.has(i) && 'hand-reveal')}>
+              <CardView small card={c} focused={focusIdx === i} onClick={() => onCell(i)}
+                drag={{ id: `${who}-${i}`, onStart: onDragCell && c ? onDragCell(i) : undefined, onDrop: () => onDropCell(i), canDrop: open }} />
+            </div>
+          );
+        })}
       </div>
       <div className="mt-2 flex min-h-6 flex-wrap gap-1 text-[11px]">
         {scores.hands.map((h) => <span key={h.line} className="rounded bg-sky-100 px-1.5 py-0.5" title={h.line}>{t(`hand.${h.type}`)} {h.points}</span>)}
