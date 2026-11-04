@@ -1,5 +1,5 @@
 import {
-  applyMove, chooseMove, newGame, other, result, scoreGrid, seeded,
+  applyMove, autoMove, chooseMove, newGame, other, result, scoreGrid, seeded,
   type Difficulty, type GameState, type Mode, type Move, type PlayerId, type Rank, type Suit,
 } from '@tatp/game';
 import clsx from 'clsx';
@@ -21,6 +21,7 @@ import { useGamepad } from './useGamepad';
 import { useHandSounds } from './useHandSounds';
 import { useHandReveal } from './useHandReveal';
 import { useRoom, type Incoming } from './useRoom';
+import { useBotClock, useDeadlineClock } from './useTurnClock';
 
 const SOUND_LABEL = { on: 'voiceOn', voiceOff: 'voiceOff', mute: 'soundMuted' } as const;
 const NEXT_SOUND_MODE = { on: 'voiceOff', voiceOff: 'mute', mute: 'on' } as const;
@@ -75,6 +76,7 @@ export function App() {
   const online = screen === 'online';
   const [gotState, setGotState] = useState(false); // first server snapshot received
   const [awaiting, setAwaiting] = useState(false); // our move is sent; waiting for the server's snapshot
+  const [deadline, setDeadline] = useState<number | null>(null); // online: when the server plays for the player on turn
   const [inbox, setInbox] = useState<Incoming[]>([]); // server snapshots not yet shown (held back during the opening draw/animations)
   const room = useRoom(
     (m) => setInbox((q) => [...q, m]),
@@ -92,6 +94,16 @@ export function App() {
   const soundBusy = useSoundBusy();
   const soundMode = useSoundMode();
   const canAct = myTurn && inGame && !soundBusy && !intro && !help && !awaiting && (!online || room.link === 'open'); // input waits for voice clips and the opening draw
+
+  // Time limit. Against the bot the clock is local and pauses while the opening draw, help or a voice clip is up.
+  const submitRef = useRef<(m: Move) => void>(() => {});
+  const botLeft = useBotClock(game, screen === 'bot' && myTurn, intro || help || soundBusy, () => {
+    setNote(t('noteAuto'));
+    playFlip();
+    submitRef.current(autoMove(gameRef.current));
+  });
+  const onlineLeft = useDeadlineClock(online ? deadline : null);
+  const clockLeft = game.phase === 'playing' && !intro ? (online ? onlineLeft : botLeft) : null;
 
   // Bot plays after a short pause.
   useEffect(() => {
@@ -126,14 +138,14 @@ export function App() {
     if (!m) return;
     const shift = () => setInbox((q) => q.slice(1));
     if (m.fresh) {
-      setGame(m.state); setGotState(true); setSel(null); setJoker(null); setNote(''); setAwaiting(false);
+      setGame(m.state); setDeadline(m.deadline); setGotState(true); setSel(null); setJoker(null); setNote(''); setAwaiting(false);
       setIntro(true); setGameId((n) => n + 1);
       shift();
       return;
     }
     if (!gotState) {
       // First snapshot of this session and not a new game: we reconnected to a game in progress (page refresh).
-      setGame(m.state); setGotState(true); setIntro(false); setAwaiting(false);
+      setGame(m.state); setDeadline(m.deadline); setGotState(true); setIntro(false); setAwaiting(false);
       shift();
       return;
     }
@@ -144,18 +156,20 @@ export function App() {
       const mine = epoch.current;
       const what = gameRef.current.pool[mv.move.slot];
       const steal = mv.move.type === 'STEAL';
-      setNote(steal ? t('noteRobbedBy', { name: oppName }) : what === 'JOKER' ? t('noteJokerBy', { name: oppName }) : '');
+      const what_ = steal ? t('noteRobbedBy', { name: oppName }) : what === 'JOKER' ? t('noteJokerBy', { name: oppName }) : '';
+      setNote(mv.auto ? [what_, t('noteAutoBy', { name: oppName })].filter(Boolean).join(' ') : what_);
       void animateBotMove(mv.move, what === 'JOKER', () => {
         if (steal) playClip(lang, 'steal', true);
         playFlip();
-        setGame(m.state); setGotState(true);
+        setGame(m.state); setDeadline(m.deadline); setGotState(true);
       }, () => epoch.current !== mine).then(() => {
         pumping.current = false;
         if (epoch.current === mine) shift();
       });
       return;
     }
-    setGame(m.state); setGotState(true); setAwaiting(false);
+    setGame(m.state); setDeadline(m.deadline); setGotState(true); setAwaiting(false);
+    if (mv?.auto) { setNote(t('noteAuto')); setSel(null); setJoker(null); } // our time ran out and the server played for us
     shift();
   }, [online, inbox, intro, gotState, t, lang, oppName]);
 
@@ -165,6 +179,7 @@ export function App() {
     else setGame(applyMove(game, move, rng.current));
     setSel(null); setJoker(null);
   };
+  submitRef.current = submit;
 
   useEffect(() => { if (room.roomId) showRoomInUrl(room.roomId); }, [room.roomId]);
   useEffect(() => { if (screen === 'menu') wakeServer(); }, [screen]);
@@ -291,6 +306,11 @@ export function App() {
 
       <div className="mb-3 rounded-full bg-white px-3 py-2 text-center text-xs sm:px-4 sm:text-sm font-medium shadow-sm">
         {status}{note && <span className="ml-3 text-slate-500">{note}</span>}
+        {clockLeft !== null && (
+          <span role="timer" aria-label={t('timeLeft')} className={clsx('ml-3 inline-block rounded-full px-2 tabular-nums', clockLeft <= 5000 ? 'bg-red-100 font-bold text-red-700' : 'bg-slate-100 text-slate-600')}>
+            ⏱ {Math.ceil(clockLeft / 1000)}s
+          </span>
+        )}
       </div>
 
       {/* <md: pool row on top, two boards below. md+: boards flank a vertical pool. */}

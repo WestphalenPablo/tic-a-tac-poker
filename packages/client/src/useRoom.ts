@@ -12,7 +12,8 @@ export interface RoomView {
   rematch: { you: boolean; opponent: boolean };
 }
 
-export interface Incoming { state: GameState; lastMove: LastMove | null; fresh: boolean }
+/** `deadline` is when the server plays for the player on turn (epoch ms, from this device's clock), or null. */
+export interface Incoming { state: GameState; lastMove: LastMove | null; fresh: boolean; deadline: number | null }
 
 /** Errors that end the session. Everything else is a rejected move. */
 const FATAL: ErrorCode[] = ['room_not_found', 'room_full', 'server_full', 'bad_message', 'no_room'];
@@ -81,7 +82,7 @@ export function useRoom(onState: (m: Incoming) => void, onRejected: (code: Error
         setInfo(view);
         if (m.status === 'closed') { if (s.id) dropToken(s.id); stop(); setLink('idle'); }
       } else if (m.t === 'state') {
-        cbs.current.onState({ state: m.state, lastMove: m.lastMove, fresh: m.fresh });
+        cbs.current.onState({ state: m.state, lastMove: m.lastMove, fresh: m.fresh, deadline: m.timeLeftMs == null ? null : Date.now() + m.timeLeftMs });
       } else if (FATAL.includes(m.code)) {
         if (s.id && m.code === 'room_not_found') dropToken(s.id);
         stop();
