@@ -76,3 +76,10 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 ## Online rooms
 
 **What:** play a friend over a shared link. New `packages/server` (Node + `ws`), wire protocol in `packages/game/src/protocol.ts`, and a lobby flow in the client. Design in [multiplayer-server.md](multiplayer-server.md), UI in [online-rooms-ui.md](online-rooms-ui.md).
+
+## Hand reveal animation
+
+**What:** when a move creates a hand, the cards of that hand get an amber outline and a short pulse (0.9s). If one move creates several hands (one card completing a row and a column), they are shown one after another, in line order. Applies to both boards (also the opponent's and online snapshots). Hands already on screen at first render are not animated; hands that stop scoring (robbed card) are dropped from the queue. Honors `prefers-reduced-motion` (outline only).
+**Where:** new `packages/client/src/useHandReveal.ts` (queue + timer), used in `Board` in `App.tsx`; `.hand-reveal` keyframes in `index.css`. The animating cell is remounted via a changing `key` so the CSS animation restarts per hand.
+**Why a hook, not the reducer:** score is a pure function of the grid, so "new hand" is detected by diffing `scoreGrid` output, like `useHandSounds`.
+**Verified:** `pnpm typecheck`, `pnpm test`. **Not verified:** visually in a browser; timing against voice clips and the bot's fly animation (the reveal starts as soon as state commits).

@@ -17,6 +17,7 @@ import { playFlip } from './sfx';
 import { markTutorialSeen, seenTutorial, Tutorial } from './Tutorial';
 import { useGamepad } from './useGamepad';
 import { useHandSounds } from './useHandSounds';
+import { useHandReveal } from './useHandReveal';
 import { useRoom, type Incoming } from './useRoom';
 
 const HUMAN: PlayerId = 'p1';
@@ -345,6 +346,7 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
   onDragCell?: (i: number) => () => void; onDropCell: (i: number) => void;
 }) {
   const { t, lang } = useI18n();
+  const reveal = useHandReveal(scores.hands);
   return (
     <section className={clsx('min-w-0 rounded-xl bg-white p-2 shadow sm:p-3', active && (color === 'you' ? 'ring-4 ring-you/50' : 'ring-4 ring-bot/50'))}>
       <div className="mb-2 flex items-center justify-between">
@@ -356,7 +358,7 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, foc
       </div>
       <div className="grid grid-cols-[repeat(3,auto)] justify-center gap-2 sm:gap-4">
         {game.grids[who].map((c, i) => (
-          <div key={i} data-cell={`${who}-${i}`} className={clsx(highlight && (who === 'p1' ? !c : !!c) && 'rounded-lg ring-2 ring-amber-400')}>
+          <div key={reveal.cells.has(i) ? `${i}-${reveal.key}` : i} data-cell={`${who}-${i}`} className={clsx('rounded-lg', highlight && (who === 'p1' ? !c : !!c) && 'ring-2 ring-amber-400', reveal.cells.has(i) && 'hand-reveal')}>
             <CardView small card={c} focused={focusIdx === i} onClick={() => onCell(i)}
               drag={{
                 onDragStart: onDragCell && c ? onDragCell(i) : undefined,

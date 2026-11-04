@@ -6,3 +6,19 @@
   --color-bot: #ef4444;
 }
 body { @apply bg-slate-100 text-slate-800 antialiased; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+/* Outline + gentle pulse on the cards of a hand that was just made. */
+.hand-reveal {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid #f59e0b;
+  outline-offset: 2px;
+  animation: hand-reveal 0.9s ease-in-out;
+}
+@keyframes hand-reveal {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+  35%  { transform: scale(1.12); box-shadow: 0 0 16px 6px rgba(245, 158, 11, 0.6); }
+  70%  { transform: scale(1.04); box-shadow: 0 0 10px 3px rgba(245, 158, 11, 0.4); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .hand-reveal { animation: none; } }

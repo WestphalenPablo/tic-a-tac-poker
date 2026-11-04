@@ -4,7 +4,7 @@ Working notes on what has been built and why. The master doc for rules and statu
 
 | Doc | Covers |
 |---|---|
-| [changelog.md](changelog.md) | Client changes after the baseline: drag and drop, gamepad, responsive layout, sound pointer |
+| [changelog.md](changelog.md) | Client changes after the baseline: hand-reveal animation, drag and drop, gamepad, responsive layout, sound pointer |
 | [sound-effects.md](sound-effects.md) | Voice clips for hands/Joker/Robber, playback rules, ffmpeg pipeline |
 | [first-draw.md](first-draw.md) | Who-starts ritual: decisions, rule change, implementation plan and status |
 | [history.md](history.md) | Commit-by-commit timeline backfilled from git |
