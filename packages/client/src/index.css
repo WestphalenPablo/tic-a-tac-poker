@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-msn: #0284c7;
+  --color-you: #10b981;
+  --color-bot: #ef4444;
+}
+body { @apply bg-slate-100 text-slate-800 antialiased; font-family: 'Segoe UI', system-ui, sans-serif; }

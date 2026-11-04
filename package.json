@@ -1,0 +1,12 @@
+{
+  "name": "tic-a-tac-poker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "dev": "pnpm --filter @tatp/client dev",
+    "build": "pnpm --filter @tatp/client build"
+  },
+  "packageManager": "pnpm@12.16.1"
+}

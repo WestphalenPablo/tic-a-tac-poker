@@ -1,0 +1,13 @@
+# Tic-a-Tac Poker
+
+Web clone of MSN Games Tic-a-Tac Poker. MVP = single player vs bot (no multiplayer/server yet). Master doc: `README.md`.
+
+- `packages/game` — pure TS rules, reducer (`applyMove`), bot, scoring. No I/O; randomness is injected (`Rng`), never `Math.random()`.
+- `packages/client` — React + Vite + Tailwind v4 UI; imports `@tatp/game`.
+- Rules live in `README.md` ("The rules, as implemented"). Change the doc first, then tests, then code.
+- `fixtures/golden-game-01.json` is replayed by `golden.test.ts`. Its pool refills are unreliable; the test overrides each drafted slot.
+- `legacy/` is archived research. Don't edit it; don't treat it as current.
+
+Key model: score is a pure function of the grid (`scoreGrid`); Robber losses/gains fall out of recomputing it.
+
+Commands: `pnpm test`, `pnpm typecheck`, `pnpm dev`, `pnpm build` (Node 24, pnpm 12).
