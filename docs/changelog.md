@@ -33,3 +33,7 @@ Changes to `packages/client` since the original implementation (click-to-select 
 ## Not verified
 
 Drag and drop, controller input and the breakpoints were checked with `pnpm typecheck` and `pnpm build` only, not in a browser or with a physical controller.
+
+## Sound effects
+
+Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.md](sound-effects.md).

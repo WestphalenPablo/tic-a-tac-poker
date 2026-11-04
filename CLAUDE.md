@@ -13,3 +13,5 @@ Key model: score is a pure function of the grid (`scoreGrid`); Robber losses/gai
 Commands: `pnpm test`, `pnpm typecheck`, `pnpm dev`, `pnpm build` (Node 24, pnpm 12).
 
 Housekeeping: whenever `*:Zone.Identifier` files (Windows download markers) show up anywhere in the repo, delete them (`find . -name '*:Zone.Identifier' -not -path '*/node_modules/*' -delete`).
+
+Documentation: always document the work we do in MDs under `docs/` (what changed, where, why, how verified, what is not verified), and add new docs to the index in `docs/README.md`. Update the existing doc when extending earlier work.
