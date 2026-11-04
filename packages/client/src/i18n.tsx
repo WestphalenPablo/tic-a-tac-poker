@@ -43,6 +43,8 @@ const en = {
   backToMenu: 'Back to menu', leaveRoom: 'Leave room', leaveConfirm: 'Leave this room? The game ends for both players.',
   rematchWaiting: 'Waiting for {name}…', rematchAsked: '{name} wants a rematch',
   updateAvailable: 'A new version is available.', reload: 'Reload',
+  install: 'Install', notNow: 'Not now', installPrompt: 'Install Tic-a-Tac Poker for quick access and offline play.',
+  installIos: 'To install: tap the Share button, then “Add to Home Screen”.',
 };
 export type Key = keyof typeof en;
 
@@ -89,6 +91,8 @@ const ptBR: Record<Key, string> = {
   backToMenu: 'Voltar ao menu', leaveRoom: 'Sair da sala', leaveConfirm: 'Sair desta sala? O jogo termina para os dois jogadores.',
   rematchWaiting: 'Aguardando {name}…', rematchAsked: '{name} quer a revanche',
   updateAvailable: 'Há uma nova versão disponível.', reload: 'Recarregar',
+  install: 'Instalar', notNow: 'Agora não', installPrompt: 'Instale o Tic-a-Tac Poker para acesso rápido e jogo offline.',
+  installIos: 'Para instalar: toque em Compartilhar e depois em “Adicionar à Tela de Início”.',
 };
 
 export const LANGS = { en: 'English', 'pt-BR': 'Português (Brasil)' } as const;

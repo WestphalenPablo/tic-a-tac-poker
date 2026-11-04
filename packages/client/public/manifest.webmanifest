@@ -1,0 +1,16 @@
+{
+  "name": "Tic-a-Tac Poker",
+  "short_name": "Tic-a-Tac",
+  "description": "Web clone of MSN Games Tic-a-Tac Poker: build the best poker hands on a 3x3 grid.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0284c7",
+  "theme_color": "#0284c7",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

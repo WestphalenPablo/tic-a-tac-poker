@@ -8,6 +8,7 @@ import { animateBotMove, cancelAnimations } from './animations';
 import { CardView } from './CardView';
 import { SERVER_URL, wakeServer } from './config';
 import { FirstDraw } from './FirstDraw';
+import { InstallButton } from './InstallPrompt';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
 import { MenuModal, NamePrompt, NoticeModal, RoomModal, saveName } from './Lobby';
@@ -271,6 +272,7 @@ export function App() {
             {(Object.keys(LANGS) as Lang[]).map((l) => <option key={l} value={l} className="text-black">{LANGS[l]}</option>)}
           </select>
           <button aria-label={t('howToPlay')} title={t('howToPlay')} className="rounded bg-white/25 px-3 py-1 font-semibold hover:bg-white/40" onClick={() => setHelp(true)}>?</button>
+          <InstallButton />
           <button className="rounded bg-white/25 px-3 py-1 font-semibold hover:bg-white/40" onClick={askMenu}>{t('newGame')}</button>
         </div>
       </header>
