@@ -42,6 +42,7 @@ const en = {
   roomClosed: 'Room closed', roomClosedBody: 'The other player left the room.',
   backToMenu: 'Back to menu', leaveRoom: 'Leave room', leaveConfirm: 'Leave this room? The game ends for both players.',
   rematchWaiting: 'Waiting for {name}…', rematchAsked: '{name} wants a rematch',
+  updateAvailable: 'A new version is available.', reload: 'Reload',
 };
 export type Key = keyof typeof en;
 
@@ -87,6 +88,7 @@ const ptBR: Record<Key, string> = {
   roomClosed: 'Sala encerrada', roomClosedBody: 'O outro jogador saiu da sala.',
   backToMenu: 'Voltar ao menu', leaveRoom: 'Sair da sala', leaveConfirm: 'Sair desta sala? O jogo termina para os dois jogadores.',
   rematchWaiting: 'Aguardando {name}…', rematchAsked: '{name} quer a revanche',
+  updateAvailable: 'Há uma nova versão disponível.', reload: 'Recarregar',
 };
 
 export const LANGS = { en: 'English', 'pt-BR': 'Português (Brasil)' } as const;

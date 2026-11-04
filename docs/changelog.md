@@ -87,3 +87,7 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 **Follow-up (Joker marker):** cards placed via a Joker no longer get a permanent fuchsia border (it read as a stuck highlight next to the hand reveal). They keep the 🃏 corner badge and the faint fuchsia background; the border is the normal slate one. **Where:** `CardView.tsx`. **Verified:** `pnpm typecheck`. **Not verified:** visually.
 
 **Follow-up (Joker cards look natural):** removed the rest of the Joker marker (🃏 corner badge and fuchsia background). A Joker-placed card now renders exactly like an organic card; the `joker` flag stays in the data only. Reason: scoring and Robber ignore it, and a permanent highlight competes with the hand reveal. **Where:** `CardView.tsx`. **Verified:** `pnpm typecheck`. **Not verified:** visually.
+
+## Update banner
+
+**What:** open tabs show a "new version, Reload" banner after a deploy. Details in [update-banner.md](update-banner.md). **Verified:** `pnpm typecheck`, `pnpm build`. **Not verified:** in a browser.
