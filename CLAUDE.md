@@ -11,3 +11,5 @@ Web clone of MSN Games Tic-a-Tac Poker. MVP = single player vs bot (no multiplay
 Key model: score is a pure function of the grid (`scoreGrid`); Robber losses/gains fall out of recomputing it.
 
 Commands: `pnpm test`, `pnpm typecheck`, `pnpm dev`, `pnpm build` (Node 24, pnpm 12).
+
+Housekeeping: whenever `*:Zone.Identifier` files (Windows download markers) show up anywhere in the repo, delete them (`find . -name '*:Zone.Identifier' -not -path '*/node_modules/*' -delete`).

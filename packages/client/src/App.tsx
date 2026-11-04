@@ -8,6 +8,7 @@ import { CardView } from './CardView';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
 import { useGamepad } from './useGamepad';
+import { useHandSounds } from './useHandSounds';
 
 const HUMAN: PlayerId = 'p1';
 
@@ -48,6 +49,8 @@ export function App() {
 
   const start = (m = mode) => { setGame(newGame(rng.current, m)); setSel(null); setJoker(null); setNote(''); };
   const scores = useMemo(() => ({ p1: scoreGrid(game.grids.p1), p2: scoreGrid(game.grids.p2) }), [game]);
+  const handsByPlayer = useMemo(() => ({ p1: scores.p1.hands, p2: scores.p2.hands }), [scores]);
+  useHandSounds(handsByPlayer, lang);
   const myTurn = game.phase === 'playing' && game.current === HUMAN;
 
   // Bot plays after a short pause.
