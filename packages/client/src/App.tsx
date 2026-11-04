@@ -41,7 +41,7 @@ type Pending = { slot: number } & ({ kind: 'place' } | { kind: 'steal'; from?: n
 
 export function App() {
   const { t, lang, setLang } = useI18n();
-  const [mode, setMode] = useState<Mode>('MSN');
+  const [mode] = useState<Mode>('MSN'); // Classic stays implemented but is not exposed in the UI for now
   const [level, setLevel] = useState<Difficulty>('easy');
   const rng = useRef(seeded(Date.now()));
   const [game, setGame] = useState<GameState>(() => newGame(rng.current, 'MSN'));
@@ -153,10 +153,6 @@ export function App() {
       <header className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gradient-to-r from-msn to-sky-400 px-3 py-2 text-white shadow sm:mb-4 sm:px-4">
         <h1 className="text-lg font-extrabold sm:text-xl tracking-tight">{t('title')}</h1>
         <div className="flex flex-wrap gap-2 text-xs sm:gap-3 sm:text-sm">
-          <select className="rounded bg-white/20 px-2 py-1" value={mode} onChange={(e) => { const m = e.target.value as Mode; setMode(m); start(m); }}>
-            <option value="MSN" className="text-black">{t('modeMsn')}</option>
-            <option value="CLASSIC" className="text-black">{t('modeClassic')}</option>
-          </select>
           <select className="rounded bg-white/20 px-2 py-1" value={level} onChange={(e) => setLevel(e.target.value as Difficulty)}>
             <option value="easy" className="text-black">{t('botEasy')}</option>
             <option value="hard" className="text-black">{t('botHard')}</option>

@@ -15,3 +15,7 @@
 **Why:** new players had no explanation of the pool draft, Joker or Robber. Kept to text plus a small card visual per step; no rules changed.
 
 **Verified:** `pnpm typecheck` (en/pt-BR key parity) and `pnpm test`. **Not verified:** behaviour in a browser (first-launch flow, reopening mid-game, mobile layout, gamepad), and the Portuguese wording was not reviewed by a native reader.
+
+## Update: no mode mentions
+
+The MSN/Classic selector was removed from the header and the app always starts in MSN (`App.tsx`: `mode` is fixed; `Mode`/Classic stay implemented in `@tatp/game`, and the `modeMsn`/`modeClassic` i18n keys are unused for now). The tutorial no longer mentions modes and says "your opponent" instead of "the bot" (en and pt-BR). Verified: `pnpm typecheck`. Not verified: in a browser.

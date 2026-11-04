@@ -25,9 +25,9 @@ const en = {
   drawYouFirst: 'You play first', drawBotFirst: 'The bot plays first',
   howToPlay: 'How to play', next: 'Next', back: 'Back', skip: 'Skip', letsPlay: "Let's play",
   tut1Title: 'Build the best poker hands', tut1Body: 'Fill your 3x3 grid with cards. Every row, column and diagonal is a poker line that scores. The higher total wins.',
-  tut2Title: 'Draft and place', tut2Body: 'On your turn, take one card from the pool in the middle and put it on an empty cell of your grid. Click it, or drag it. Then the bot plays.',
+  tut2Title: 'Draft and place', tut2Body: 'On your turn, take one card from the pool in the middle and put it on an empty cell of your grid. Click it, or drag it. Then your opponent plays.',
   tut3Title: 'Hands and points', tut3Body: 'A line scores its best hand. A pair counts as soon as two cards match, even with the third cell empty. Ace works low or high.',
-  tut4Title: 'Joker and Robber', tut4Body: 'The Joker becomes any card you choose. The Robber steals a card from the bot, and the victim places two cards next turn. (MSN mode only.)',
+  tut4Title: 'Joker and Robber', tut4Body: 'The Joker becomes any card you choose. The Robber steals a card from your opponent, and the victim places two cards next turn.',
   tut5Title: 'Who starts?', tut5Body: 'Each side draws a card first: the higher card plays first. You can reopen this guide any time with the ? button.',
 };
 export type Key = keyof typeof en;
@@ -57,9 +57,9 @@ const ptBR: Record<Key, string> = {
   drawYouFirst: 'Você joga primeiro', drawBotFirst: 'O bot joga primeiro',
   howToPlay: 'Como jogar', next: 'Avançar', back: 'Voltar', skip: 'Pular', letsPlay: 'Vamos jogar',
   tut1Title: 'Monte as melhores mãos de pôquer', tut1Body: 'Preencha sua grade 3x3 com cartas. Cada linha, coluna e diagonal é uma linha de pôquer que pontua. Vence quem somar mais.',
-  tut2Title: 'Escolha e coloque', tut2Body: 'Na sua vez, pegue uma carta do monte no centro e coloque em uma célula vazia da sua grade. Clique ou arraste. Depois joga o bot.',
+  tut2Title: 'Escolha e coloque', tut2Body: 'Na sua vez, pegue uma carta do monte no centro e coloque em uma célula vazia da sua grade. Clique ou arraste. Depois joga o oponente.',
   tut3Title: 'Mãos e pontos', tut3Body: 'Cada linha vale sua melhor mão. Um par já conta com duas cartas iguais, mesmo com a terceira célula vazia. O Ás vale baixo ou alto.',
-  tut4Title: 'Coringa e Ladrão', tut4Body: 'O Coringa vira a carta que você escolher. O Ladrão rouba uma carta do bot, e a vítima joga duas cartas na vez seguinte. (Só no modo MSN.)',
+  tut4Title: 'Coringa e Ladrão', tut4Body: 'O Coringa vira a carta que você escolher. O Ladrão rouba uma carta do oponente, e a vítima joga duas cartas na vez seguinte.',
   tut5Title: 'Quem começa?', tut5Body: 'Cada lado sorteia uma carta antes: a mais alta joga primeiro. Você pode rever este guia a qualquer momento no botão ?.',
 };
 
