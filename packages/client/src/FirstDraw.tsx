@@ -8,9 +8,9 @@ import { playFlip, playTie, playWin } from './sfx';
 type Draw = Record<PlayerId, Card>;
 type View = { round: number; you: boolean; bot: boolean; tie: boolean; winner: boolean };
 
-/** Timings (ms). One decisive round totals LEAD + DECISIVE = 3000; each tied round adds TIED. */
-const LEAD = 400, BOT_AFTER = 700, WINNER_AFTER = 1300, DECISIVE = 2600;
-const TIE_BOT_AFTER = 600, TIE_MSG_AFTER = 1000, TIED = 1500;
+/** Timings (ms). One decisive round totals LEAD + DECISIVE = 8000; each tied round adds TIED. */
+const LEAD = 1000, YOU_AFTER = 300, BOT_AFTER = 2000, WINNER_AFTER = 3500, DECISIVE = 7000;
+const TIE_BOT_AFTER = 1200, TIE_MSG_AFTER = 2000, TIED = 3000;
 
 type Step = { at: number; view: View; sound?: () => void };
 
@@ -22,7 +22,7 @@ export function drawTimeline(rounds: number): { steps: Step[]; total: number } {
     const last = r === rounds - 1;
     const v = (p: Partial<View>): View => ({ round: r, you: false, bot: false, tie: false, winner: false, ...p });
     steps.push({ at: t, view: v({}) }); // show face-down cards for this round
-    steps.push({ at: t + 100, view: v({ you: true }), sound: playFlip });
+    steps.push({ at: t + YOU_AFTER, view: v({ you: true }), sound: playFlip });
     const bot = last ? BOT_AFTER : TIE_BOT_AFTER;
     steps.push({ at: t + bot, view: v({ you: true, bot: true }), sound: playFlip });
     if (last) {
