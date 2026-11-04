@@ -4,7 +4,7 @@ services:
   - type: web
     name: tatp-server
     runtime: node
-    plan: starter # paid on purpose: free web services sleep after ~15 min idle
+    plan: free # sleeps after ~15 min without traffic (cold start on the next visit). Switch to `starter` for always-on.
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @tatp/server build
     startCommand: node packages/server/dist/index.cjs
     healthCheckPath: /health

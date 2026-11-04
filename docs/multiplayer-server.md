@@ -65,7 +65,7 @@ Pages and Render both deploy from this repo and know nothing about each other.
 
 ## Deploying (manual, not done)
 
-1. Render dashboard: New → Blueprint, pick this repo; it reads `render.yaml`. The plan is a paid one because always-on is a requirement (Render's free web services sleep after ~15 minutes idle). Check current pricing.
+1. Render dashboard: New → Blueprint, pick this repo; it reads `render.yaml`. The plan is **free**, because the owner does not want to pay for hosting. Cost of that: a free web service sleeps after about 15 minutes without traffic, the next connection waits for a cold start (roughly a minute), and in-memory rooms are lost when it sleeps. Always-on needs a paid plan: change `plan: free` to `plan: starter` in `render.yaml` (Render then asks for a card). Whether open WebSocket connections keep a free service awake was not checked.
 2. When the service is live, set the GitHub repo variable `VITE_SERVER_URL=wss://<service>.onrender.com` (Settings → Secrets and variables → Actions → Variables) and re-run the Pages workflow. Until it is set, the production client hides "Create room" and only offers the bot.
 3. If the Pages URL ever changes, update `ALLOWED_ORIGINS`.
 
