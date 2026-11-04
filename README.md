@@ -29,7 +29,7 @@ The project began as research, all archived in [`legacy/`](legacy/README.md):
 | Easy and Hard bot | **Built** |
 | React + Vite + Tailwind client | **Built** (`packages/client`) |
 | Joker and Robber ("MSN" mode) and plain 52-card "Classic" mode | **Built** (toggle in header) |
-| Server, lobby, chat, multiplayer | **Deferred** — not in the MVP |
+| Server, lobby, chat, multiplayer | **Deferred** — not in the MVP. Decided: Node + `ws` on Render ([docs/multiplayer-server.md](docs/multiplayer-server.md)) |
 | Turn timer, sound, card art, animations | **Not built** |
 
 ```
