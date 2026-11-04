@@ -10,6 +10,7 @@ import { FirstDraw } from './FirstDraw';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
 import { playClip, useSoundBusy } from './sounds';
+import { playFlip } from './sfx';
 import { markTutorialSeen, seenTutorial, Tutorial } from './Tutorial';
 import { useGamepad } from './useGamepad';
 import { useHandSounds } from './useHandSounds';
@@ -78,6 +79,7 @@ export function App() {
       // Show the move first; the state change lands with the card, then the voice clip plays.
       void animateBotMove(move, what === 'JOKER', () => {
         if (move.type === 'STEAL') playClip(lang, 'steal', true);
+        playFlip();
         setGame(next);
       }, () => dead);
     }, 600);
@@ -85,6 +87,7 @@ export function App() {
   }, [game, level, t, lang, soundBusy, intro, help]);
 
   const play = (slot: number, cell: number, as?: { rank: Rank; suit: Suit }) => {
+    playFlip();
     setGame(applyMove(game, { type: 'PLACE', slot, cell, as }, rng.current));
     setSel(null); setJoker(null);
   };
@@ -104,6 +107,7 @@ export function App() {
     if (sel.kind === 'steal') {
       if (sel.from === undefined) return;
       playClip(lang, 'steal', true);
+      playFlip();
       setGame(applyMove(game, { type: 'STEAL', slot: sel.slot, from: sel.from, to: i }, rng.current));
       setSel(null);
     } else if (game.pool[sel.slot] === 'JOKER') setJoker(i);
