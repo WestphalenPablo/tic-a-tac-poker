@@ -75,7 +75,6 @@ export function App() {
       // Show the move first; the state change lands with the card, then the voice clip plays.
       void animateBotMove(move, what === 'JOKER', () => {
         if (move.type === 'STEAL') playClip(lang, 'steal', true);
-        else if (what === 'JOKER') playClip(lang, 'joker', true);
         setGame(next);
       }, () => dead);
     }, 600);
@@ -83,7 +82,6 @@ export function App() {
   }, [game, level, t, lang, soundBusy, intro]);
 
   const play = (slot: number, cell: number, as?: { rank: Rank; suit: Suit }) => {
-    if (game.pool[slot] === 'JOKER') playClip(lang, 'joker', true);
     setGame(applyMove(game, { type: 'PLACE', slot, cell, as }, rng.current));
     setSel(null); setJoker(null);
   };

@@ -1,18 +1,19 @@
 # Sound effects (voice clips)
 
-Added 2026-11-03. The client plays short spoken clips when hands are made and on Joker/Robber moves. Only Portuguese (`pt-BR`) exists so far; other languages are silent.
+Added 2026-11-03. The client plays short spoken clips when hands are made and on Robber moves. Only Portuguese (`pt-BR`) exists so far; other languages are silent.
 
 ## Behaviour
 
 | Clip | Plays when |
 |---|---|
 | `pair`, `flush`, `straight`, `three-of-a-kind`, `straight-flush`, `royal-flush` | A hand newly appears in either grid (new `line:type` key for that player). Several at once: only the highest-scoring one plays. A pair upgrading to three of a kind counts as new. Starting a new game plays nothing. |
-| `joker` | Anyone places a Joker (human: when the identity picker is confirmed; bot: when it plays it). |
 | `steal` | Anyone completes a Robber move (human: when the stolen card is dropped; bot: when it robs you). |
 
-Priority (`src/sounds.ts`): event clips (`joker`, `steal`) cut off whatever is playing. Hand clips cut off other hand clips but wait for a playing event clip to finish, so the "robbed" clip isn't lost to the hand it forms.
+Priority (`src/sounds.ts`): event clips (`steal`) cut off whatever is playing. Hand clips cut off other hand clips but wait for a playing event clip to finish, so the "robbed" clip isn't lost to the hand it forms.
 
 The UI waits for clips: `useSoundBusy()` (in `sounds.ts`) is true while a clip is playing or queued. `App.tsx` ignores pool/cell clicks, drags and gamepad actions until it clears (`canAct`), and the bot's 900 ms move timer doesn't start until it clears. The status text and highlights still follow whose turn it is. "New game" is not blocked. A clip that errors (missing file) or is blocked by autoplay is treated as finished immediately, so the UI never hangs on audio.
+
+The Joker clip (`sounds/pt/joker.m4a`) was removed from playback on 2026-11-03: the code no longer plays it (the files `sounds/pt/joker.m4a` and `public/sounds/pt/joker.mp3` are left in place, unused).
 
 Autoplay may be blocked by the browser before the first interaction.
 
@@ -20,7 +21,7 @@ Autoplay may be blocked by the browser before the first interaction.
 
 - `packages/client/src/sounds.ts`: `playClip(lang, clip, event?)`, `useSoundBusy()`, language-to-folder map (`pt-BR` -> `pt`), the priority rule.
 - `packages/client/src/useHandSounds.ts`: diffs the scored hands of both grids per render and calls `playClip`.
-- `packages/client/src/App.tsx`: calls `useHandSounds`, and `playClip` for Joker/steal in the bot effect, `play()` and `onMyCell`.
+- `packages/client/src/App.tsx`: calls `useHandSounds`, and `playClip` for steal in the bot effect, `play()` and `onMyCell`.
 - Assets: `packages/client/public/sounds/pt/*.mp3`, served at `/sounds/pt/<clip>.mp3`.
 - Sources: original recordings under `sounds/<lang>/` (`.m4a`).
 

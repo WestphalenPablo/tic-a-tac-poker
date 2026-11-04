@@ -6,7 +6,7 @@ const SOUND_DIR: Partial<Record<Lang, string>> = { 'pt-BR': 'pt' };
 
 export type Clip =
   | 'pair' | 'flush' | 'straight' | 'three-of-a-kind' | 'straight-flush' | 'royal-flush'
-  | 'joker' | 'steal';
+  | 'steal';
 
 type Playing = { audio: HTMLAudioElement; event: boolean };
 let current: Playing | null = null; // set while a clip is playing or about to
@@ -32,7 +32,7 @@ function start(url: string, event: boolean) {
 }
 
 /**
- * Play a clip. Event clips (joker, steal) cut off whatever is playing; hand clips cut off other
+ * Play a clip. Event clips (steal) cut off whatever is playing; hand clips cut off other
  * hand clips but wait for a playing event clip to finish, so "robbed" isn't lost to the hand it forms.
  */
 export function playClip(lang: Lang, clip: Clip, event = false) {
