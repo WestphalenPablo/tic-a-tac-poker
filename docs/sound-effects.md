@@ -41,6 +41,8 @@ Result: every clip measures about -16 LUFS (originals ranged from -35 to -21.6),
 
 **Replacement takes** (e.g. `straight`, 2026-11-03, source in `sounds/pt/new/straight.m4a`) go through the same pipeline and overwrite the `.mp3`. That take is very peaky (crest factor about 16 dB), so the -1.5 dBFS true-peak cap limits `linear=true` gain and it lands at -17.4 LUFS instead of -16 (`royal-flush` is similarly -16.6). Left as is rather than letting `loudnorm` fall back to dynamic mode. Measured after MP3 encoding, true peaks of several clips are above 0 dBFS (up to +1.3); MP3 encoding overshoots the pre-encode -1.5 cap.
 
+**`straight-flush` replaced (2026-11-04):** new take run through the same pipeline; 1.78 s, -16.0 LUFS, pre-encode true peak -2.8 dBFS (+0.25 dBFS after MP3 encoding). Source overwrote `sounds/pt/straight-flush.m4a`. Not listened to.
+
 The `three-ofa-kind` source filename was fixed to `three-of-a-kind` in the output.
 
 ## Not verified
