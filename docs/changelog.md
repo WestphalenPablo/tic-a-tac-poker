@@ -2,13 +2,15 @@
 
 Changes to `packages/client` since the original implementation (click-to-select UI, three-column layout). `packages/game` and the rules are unchanged.
 
-## Drag and drop (mouse)
+## Drag and drop (mouse; since replaced, see [drag-drop.md](drag-drop.md))
+
+_Superseded: drag and drop now uses Pointer Events and also works on touch. The notes below describe the original native HTML5 version; the flows (what can be dragged where) are unchanged._
 
 - `CardView` takes an optional `drag` prop (`onDragStart` / `onDrop` / `onDragEnd`) and uses native HTML5 drag and drop.
 - Pool cards are draggable on your turn. Dropping on an empty cell of your board plays the card (a Joker opens the picker as before).
 - Robber: drag it onto a filled bot card to choose what to steal, then drag that card onto an empty cell of your board. Bot cards are only draggable while a Robber is selected.
 - Every grid cell is a drop target; invalid drops are ignored by the same guards the click flow uses.
-- The click-to-select flow is unchanged and remains the only path on touch devices (native HTML5 DnD has no touch support).
+- The click-to-select flow is unchanged. (At the time it was the only path on touch devices because native HTML5 DnD has no touch support; fixed by the pointer-event rewrite.)
 
 ## Controller support (Gamepad API)
 
@@ -99,3 +101,7 @@ Voice clips for hands, Joker and Robber moves (pt-BR only). See [sound-effects.m
 ## Aligned boards on mobile
 
 **What:** on phones the two boards sit side by side, and the hand labels (e.g. "Three of a kind 90") that sat above the card grid wrapped to a different number of lines per board, pushing one grid down. The labels now sit **below** the grid, so both grids always start at the same height whatever the labels do; the extra height just makes one panel taller. Player names in the title row now truncate (`truncate`, score chip `shrink-0`) so a long online name can't wrap that row either. **Where:** `Board` in `packages/client/src/App.tsx`. **Verified:** `pnpm typecheck`; headless Chromium at 375px: grid tops equal (315 and 315) before and after injecting four long labels (three wrapped lines) into one board. **Not verified:** a real phone, long names in an online game; the labels now sitting under the grid is a visual change nobody has looked at.
+
+## Pointer-event drag and drop (mouse + touch)
+
+**What:** drag and drop rewritten on Pointer Events so it works with mouse, touch and pen, with a floating ghost card and hover feedback. Details in [drag-drop.md](drag-drop.md). **Verified:** `pnpm typecheck`, `pnpm test`, headless Chromium with mouse and with real CDP touch events. **Not verified:** real iOS Safari / Android devices, haptics, the Robber two-step flow in a browser.
