@@ -1,6 +1,6 @@
 # First draw ("who starts") ritual
 
-Status: **steps 1-3 of 5 done** (rules doc, tests, engine). Client ritual and final verification are still to do.
+Status: **steps 1-4 of 5 done** (rules doc, tests, engine, client ritual). Not yet seen or heard in a browser.
 
 ## Source
 
@@ -46,11 +46,26 @@ Before step 3 these failed as intended (5 of 7; `firstDraws` was undefined). The
 
 Verified: `pnpm test` 15/15 (8 existing + 7 new), `pnpm typecheck` clean.
 
+## Step 4: client ritual (done, unseen)
+
+- `packages/client/src/FirstDraw.tsx`: modal overlay with the banner ("The highest card plays first!"), a seat for you and for the bot, and a line for the result ("You play first" / "The bot plays first") or the tie message. Cards start face-down and flip in (220 ms scaleX). The winner's card scales up with an amber ring. Props: `draws` (`GameState.firstDraws`), `starter` (`GameState.current`), `onDone`.
+- Timeline (`drawTimeline`, pure): 400 ms lead, then for the decisive round: your card at +100, bot's at +700, winner at +1300, end at +2600, so **3.0 s total** for a single round. Each tied round (your card, bot's card at +600, "Tie! Drawing again…" at +1000) takes 1.5 s, so one tie makes it 4.5 s. No cap on the number of ties (each is roughly 1 in 13).
+- `packages/client/src/sfx.ts`: synthesized sounds, no asset files: card flip (filtered noise burst), winner (two rising notes), tie (low blip). Not tied to the UI language, no voice.
+- `App.tsx`: `intro` state is true on page load and on every `start()` (new game button, mode change, play again). While true, `canAct` is false, the bot effect doesn't run, and gamepad input is ignored. `gameId` remounts the overlay if "New game" is pressed during the ritual. It is not skippable; the overlay covers the page, but the header (New game, selects) is under the overlay's backdrop so it can't be clicked either.
+- `i18n.tsx`: `drawTitle`, `drawTie`, `drawYouFirst`, `drawBotFirst` in en and pt-BR.
+
+Decision for you: the ritual also plays on first page load, since that is a new game. Say if you want it only after pressing New game.
+
+Not tied to the voice-clip busy state (no voice was chosen), so it uses its own timers.
+
 ## Planned next steps
 
-4. Client ritual component.
-5. Update this doc with verification results.
+5. Watch it in a browser, tune timings/sizes, and record the result here.
 
 ## Not verified
 
-The client ritual is not implemented yet; nothing in the UI shows the draw. The README, types and engine now agree on `firstDraws`. The multi-round replay has only been tested at the engine level.
+The client ritual only passed `pnpm typecheck`, `pnpm test` (engine, 15 tests) and `pnpm build`. Nobody has watched or listened to it:
+- layout on phone/desktop (card sizes, the scaled cards, overlay fit)
+- whether the sounds are audible and pleasant; browsers may keep the `AudioContext` suspended until the first click or key, so on a fresh page load the opening flips can be silent (later new games should be fine)
+- the real timing feel, and the multi-round replay in the UI (only the engine side is tested, and `drawTimeline` has no test)
+- that New game pressed mid-ritual restarts it cleanly

@@ -25,6 +25,10 @@ Changes to `packages/client` since the original implementation (click-to-select 
 - Desktop (>= 768px): the original three-column layout (your board, vertical pool, bot board) with original card sizes.
 - Dialogs (Joker picker, game over) use `w-[90vw] max-w-sm` instead of a fixed width so they fit narrow screens.
 
+## Opening draw ritual
+
+- New `FirstDraw` overlay plays at the start of every game (about 3 s, longer on ties), with synthesized flip/win/tie sounds from `src/sfx.ts`. Input and the bot wait for it. Details and status: [first-draw.md](first-draw.md).
+
 ## Files touched
 
 - Added: `packages/client/src/useGamepad.ts`
