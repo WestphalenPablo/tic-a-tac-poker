@@ -20,9 +20,10 @@ export type ErrorCode = 'room_not_found' | 'room_full' | 'bad_message' | 'illega
 export interface LastMove { move: Move; by: 'you' | 'opponent' }
 
 export type ServerMessage =
-  | { t: 'created'; id: string; token: string }
+  /** Sent to a player when they take (or reclaim) a seat, creator included. `token` reclaims the seat later. */
   | { t: 'joined'; id: string; token: string }
-  | { t: 'room'; status: RoomStatus; you: string; opponent: string | null; opponentOnline: boolean }
+  /** `rematch` tells each side who has asked for another game once this one is finished. */
+  | { t: 'room'; status: RoomStatus; you: string; opponent: string | null; opponentOnline: boolean; rematch: { you: boolean; opponent: boolean } }
   /** `fresh` is true only when a game starts (first game or rematch); reconnect snapshots are not fresh. */
   | { t: 'state'; state: GameState; lastMove: LastMove | null; fresh: boolean }
   | { t: 'error'; code: ErrorCode };

@@ -32,7 +32,7 @@ GitHub Pages cannot host the server: static files only, no process, no WebSocket
 One endpoint, `/ws` (any path is accepted; there is no REST, so no CORS). JSON messages; types and the validator live in `packages/game/src/protocol.ts`.
 
 Client to server: `create{name}`, `join{id,name,token?}`, `move{move}`, `rematch`, `leave`.
-Server to client: `created{id,token}`, `joined{token}`, `room{status,you,opponent,opponentOnline}`, `state{state,lastMove?,fresh}`, `error{code}`.
+Server to client: `joined{id,token}` (sent to the creator too), `room{status,you,opponent,opponentOnline,rematch}`, `state{state,lastMove?,fresh}`, `error{code}`.
 
 - `parseClientMessage` validates everything at the boundary: shapes, integer ranges for slots and cells, Joker `rank`/`suit` against the real sets (a forged Joker identity would corrupt scoring), names trimmed to 20 chars with control characters stripped.
 - **Seats.** The creator is `p1`, the joiner `p2`. Each seat gets a random token (`crypto.randomUUID`) used to reclaim it after a disconnect.
