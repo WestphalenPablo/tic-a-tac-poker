@@ -1,10 +1,9 @@
 import type { HandType, ScoredHand } from '@tatp/game';
 import { useEffect, useRef } from 'react';
 import type { Lang } from './i18n';
+import { playClip, type Clip } from './sounds';
 
-// Voice recordings per hand, keyed by UI language. Languages without a folder stay silent.
-const SOUND_DIR: Partial<Record<Lang, string>> = { 'pt-BR': 'pt' };
-const FILE: Record<HandType, string> = {
+const FILE: Record<HandType, Clip> = {
   PAIR: 'pair',
   FLUSH: 'flush',
   STRAIGHT: 'straight',
@@ -12,16 +11,6 @@ const FILE: Record<HandType, string> = {
   STRAIGHT_FLUSH: 'straight-flush',
   ROYAL_FLUSH: 'royal-flush',
 };
-
-let current: HTMLAudioElement | null = null;
-
-function play(lang: Lang, type: HandType) {
-  const dir = SOUND_DIR[lang];
-  if (!dir) return;
-  current?.pause();
-  current = new Audio(`/sounds/${dir}/${FILE[type]}.mp3`);
-  current.play().catch(() => {}); // autoplay may be blocked before the first interaction
-}
 
 /** Announce hands that newly appear in either grid. If several appear at once, only the best is played. */
 export function useHandSounds(hands: Record<'p1' | 'p2', ScoredHand[]>, lang: Lang) {
@@ -37,7 +26,7 @@ export function useHandSounds(hands: Record<'p1' | 'p2', ScoredHand[]>, lang: La
       }
     }
     seen.current = keys;
-    if (best) play(lang, best.type);
+    if (best) playClip(lang, FILE[best.type]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hands]);
 }

@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CardView } from './CardView';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
+import { playClip } from './sounds';
 import { useGamepad } from './useGamepad';
 import { useHandSounds } from './useHandSounds';
 
@@ -59,15 +60,16 @@ export function App() {
     const timer = setTimeout(() => {
       const move = chooseMove(game, level, rng.current);
       const what = game.pool[move.slot];
-      if (move.type === 'STEAL') setNote(t('noteRobbed'));
-      else if (what === 'JOKER') setNote(t('noteJoker'));
+      if (move.type === 'STEAL') { setNote(t('noteRobbed')); playClip(lang, 'steal', true); }
+      else if (what === 'JOKER') { setNote(t('noteJoker')); playClip(lang, 'joker', true); }
       else setNote('');
       setGame(applyMove(game, move, rng.current));
     }, 900);
     return () => clearTimeout(timer);
-  }, [game, level, t]);
+  }, [game, level, t, lang]);
 
   const play = (slot: number, cell: number, as?: { rank: Rank; suit: Suit }) => {
+    if (game.pool[slot] === 'JOKER') playClip(lang, 'joker', true);
     setGame(applyMove(game, { type: 'PLACE', slot, cell, as }, rng.current));
     setSel(null); setJoker(null);
   };
@@ -86,6 +88,7 @@ export function App() {
     if (!myTurn || !sel || game.grids[HUMAN][i]) return;
     if (sel.kind === 'steal') {
       if (sel.from === undefined) return;
+      playClip(lang, 'steal', true);
       setGame(applyMove(game, { type: 'STEAL', slot: sel.slot, from: sel.from, to: i }, rng.current));
       setSel(null);
     } else if (game.pool[sel.slot] === 'JOKER') setJoker(i);
