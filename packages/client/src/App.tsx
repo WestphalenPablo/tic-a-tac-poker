@@ -7,8 +7,29 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CardView } from './CardView';
 import { LANGS, useI18n, type Lang } from './i18n';
 import { JokerPicker } from './JokerPicker';
+import { useGamepad } from './useGamepad';
 
 const HUMAN: PlayerId = 'p1';
+
+type Zone = 'mine' | 'pool' | 'theirs';
+type Cursor = { zone: Zone; idx: number };
+
+/** Moves the controller cursor. Layout: my board | pool column | bot board; boards are 3x3. */
+function moveCursor(c: Cursor, dir: 'up' | 'down' | 'left' | 'right', poolSize: number): Cursor {
+  const last = Math.max(0, poolSize - 1);
+  if (c.zone === 'pool') {
+    if (dir === 'up') return { ...c, idx: Math.max(0, c.idx - 1) };
+    if (dir === 'down') return { ...c, idx: Math.min(last, c.idx + 1) };
+    const row = Math.min(2, c.idx);
+    return dir === 'left' ? { zone: 'mine', idx: row * 3 + 2 } : { zone: 'theirs', idx: row * 3 };
+  }
+  const row = Math.floor(c.idx / 3), col = c.idx % 3;
+  if (dir === 'up') return { ...c, idx: Math.max(0, row - 1) * 3 + col };
+  if (dir === 'down') return { ...c, idx: Math.min(2, row + 1) * 3 + col };
+  const toPool = (c.zone === 'mine' && dir === 'right' && col === 2) || (c.zone === 'theirs' && dir === 'left' && col === 0);
+  if (toPool) return { zone: 'pool', idx: Math.min(last, row) };
+  return { ...c, idx: row * 3 + col + (dir === 'right' ? 1 : -1) };
+}
 
 type Pending = { slot: number } & ({ kind: 'place' } | { kind: 'steal'; from?: number });
 
@@ -21,6 +42,8 @@ export function App() {
   const [sel, setSel] = useState<Pending | null>(null);
   const [joker, setJoker] = useState<number | null>(null); // target cell awaiting Joker identity
   const [note, setNote] = useState('');
+  const [cursor, setCursor] = useState<Cursor>({ zone: 'pool', idx: 0 });
+  const [padUsed, setPadUsed] = useState(false); // show controller cursor only after pad input
 
   const start = (m = mode) => { setGame(newGame(rng.current, m)); setSel(null); setJoker(null); setNote(''); };
   const scores = useMemo(() => ({ p1: scoreGrid(game.grids.p1), p2: scoreGrid(game.grids.p2) }), [game]);
@@ -80,8 +103,24 @@ export function App() {
     : sel ? t('placeCard')
     : game.placementsLeft > 1 ? t('robbedPick') : t('yourTurn');
 
+  const res0 = game.phase === 'finished';
+  useGamepad((a) => {
+    if (joker !== null) return; // JokerPicker handles its own input
+    if (res0) { if (a === 'a') start(); return; }
+    setPadUsed(true);
+    if (a === 'b') { setSel(null); return; }
+    if (a === 'a') {
+      if (cursor.zone === 'pool') onPool(cursor.idx);
+      else if (cursor.zone === 'mine') onMyCell(cursor.idx);
+      else onTheirCell(cursor.idx);
+      return;
+    }
+    setCursor((c) => moveCursor(c, a, game.pool.length));
+  });
+  const focusAt = (zone: Zone, i: number) => padUsed && cursor.zone === zone && cursor.idx === i;
+
   return (
-    <div className="mx-auto max-w-4xl p-4">
+    <div className="mx-auto max-w-4xl p-4" onPointerDown={() => setPadUsed(false)}>
       <header className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gradient-to-r from-msn to-sky-400 px-4 py-2 text-white shadow">
         <h1 className="text-xl font-extrabold tracking-tight">{t('title')}</h1>
         <div className="flex gap-3 text-sm">
@@ -106,13 +145,13 @@ export function App() {
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4">
         <Board who="p1" title={t('you')} color="you" game={game} scores={scores.p1} active={game.current === 'p1' && game.phase === 'playing'}
-          onCell={onMyCell} onDropCell={onMyCell} highlight={myTurn && !!sel && (sel.kind === 'place' || sel.from !== undefined)} />
+          onCell={onMyCell} focusIdx={focusAt('mine', cursor.idx) ? cursor.idx : -1} onDropCell={onMyCell} highlight={myTurn && !!sel && (sel.kind === 'place' || sel.from !== undefined)} />
         <div className="flex flex-col items-center gap-2 rounded-xl bg-sky-100 p-2 shadow-inner">
-          {game.pool.map((c, i) => <CardView key={i} card={c} selected={sel?.slot === i} onClick={() => onPool(i)}
+          {game.pool.map((c, i) => <CardView key={i} card={c} selected={sel?.slot === i} focused={focusAt('pool', i)} onClick={() => onPool(i)}
             drag={myTurn && c != null ? { onDragStart: dragPool(i) } : undefined} />)}
         </div>
         <Board who="p2" title={t('bot')} color="bot" game={game} scores={scores.p2} active={game.current === 'p2' && game.phase === 'playing'}
-          onCell={onTheirCell} onDragCell={myTurn && sel?.kind === 'steal' ? dragTheirs : undefined} onDropCell={onTheirCell} highlight={myTurn && sel?.kind === 'steal' && sel.from === undefined} />
+          onCell={onTheirCell} focusIdx={focusAt('theirs', cursor.idx) ? cursor.idx : -1} onDragCell={myTurn && sel?.kind === 'steal' ? dragTheirs : undefined} onDropCell={onTheirCell} highlight={myTurn && sel?.kind === 'steal' && sel.from === undefined} />
       </div>
 
       {joker !== null && sel && <JokerPicker onCancel={() => setJoker(null)} onConfirm={(as) => play(sel.slot, joker, as)} />}
@@ -137,9 +176,10 @@ export function App() {
   );
 }
 
-function Board({ who, title, color, game, scores, active, onCell, highlight, onDragCell, onDropCell }: {
+function Board({ who, title, color, game, scores, active, onCell, highlight, focusIdx, onDragCell, onDropCell }: {
   who: PlayerId; title: string; color: 'you' | 'bot'; game: GameState;
   scores: ReturnType<typeof scoreGrid>; active: boolean; onCell: (i: number) => void; highlight: boolean;
+  focusIdx: number;
   onDragCell?: (i: number) => () => void; onDropCell: (i: number) => void;
 }) {
   const { t, lang } = useI18n();
@@ -155,7 +195,7 @@ function Board({ who, title, color, game, scores, active, onCell, highlight, onD
       <div className="grid grid-cols-3 gap-1.5">
         {game.grids[who].map((c, i) => (
           <div key={i} className={clsx(highlight && (who === 'p1' ? !c : !!c) && 'rounded-lg ring-2 ring-amber-400')}>
-            <CardView small card={c} onClick={() => onCell(i)}
+            <CardView small card={c} focused={focusIdx === i} onClick={() => onCell(i)}
               drag={{
                 onDragStart: onDragCell && c ? onDragCell(i) : undefined,
                 onDrop: () => onDropCell(i),

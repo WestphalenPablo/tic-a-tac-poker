@@ -6,9 +6,9 @@ const SUIT = { S: '♠', H: '♥', D: '♦', C: '♣' } as const;
 const RED = new Set(['H', 'D']);
 
 export function CardView({
-  card, selected, onClick, small, drag,
+  card, selected, onClick, small, focused, drag,
 }: {
-  card: DeckCard | null; selected?: boolean; onClick?: () => void; small?: boolean;
+  card: DeckCard | null; selected?: boolean; onClick?: () => void; small?: boolean; focused?: boolean;
   /** Makes the card draggable / a drop target. */
   drag?: { onDragStart?: () => void; onDrop?: () => void; onDragEnd?: () => void };
 }) {
@@ -16,7 +16,7 @@ export function CardView({
   const size = small ? 'h-20 w-14 text-xl' : 'h-24 w-[4.25rem] text-2xl';
   const base = clsx(
     'relative flex flex-col items-start justify-between rounded-lg border p-1.5 font-bold leading-none select-none',
-    size, onClick && 'cursor-pointer transition hover:-translate-y-0.5', selected && 'ring-4 ring-msn',
+    size, onClick && 'cursor-pointer transition hover:-translate-y-0.5', selected && 'ring-4 ring-msn', focused && 'outline outline-4 outline-offset-2 outline-fuchsia-500',
     drag?.onDragStart && 'cursor-grab active:cursor-grabbing',
   );
   const dnd = {

@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useState } from 'react';
 import { CardView } from './CardView';
 import { useI18n } from './i18n';
+import { useGamepad } from './useGamepad';
 
 const SUIT = { S: '♠', H: '♥', D: '♦', C: '♣' } as const;
 
@@ -10,6 +11,13 @@ export function JokerPicker({ onConfirm, onCancel }: { onConfirm: (as: { rank: R
   const { t } = useI18n();
   const [rank, setRank] = useState<Rank>('A');
   const [suit, setSuit] = useState<Suit>('S');
+  useGamepad((a) => {
+    const step = (d: number) => setRank(RANKS[(RANKS.indexOf(rank) + d + RANKS.length) % RANKS.length]!);
+    const sstep = (d: number) => setSuit(SUITS[(SUITS.indexOf(suit) + d + SUITS.length) % SUITS.length]!);
+    if (a === 'left') step(-1); else if (a === 'right') step(1);
+    else if (a === 'up') sstep(-1); else if (a === 'down') sstep(1);
+    else if (a === 'a') onConfirm({ rank, suit }); else if (a === 'b') onCancel();
+  });
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/40">
       <div className="w-96 rounded-xl bg-white p-5 shadow-xl">
