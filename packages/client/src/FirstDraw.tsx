@@ -53,7 +53,11 @@ const Back = () => (
  * the bot) until `onDone`. `draws` is `GameState.firstDraws` (every tied round is replayed); `starter` is
  * `GameState.current` at the start, i.e. the winner of the last round.
  */
-export function FirstDraw({ draws, starter, onDone }: { draws: Draw[]; starter: PlayerId; onDone: () => void }) {
+export function FirstDraw({ draws, starter, onDone, youName, oppName }: {
+  draws: Draw[]; starter: PlayerId; onDone: () => void;
+  /** Online play: the players' chosen names. Without them the labels are "You" and "Bot". */
+  youName?: string; oppName?: string;
+}) {
   const { t } = useI18n();
   const [view, setView] = useState<View>({ round: 0, you: false, bot: false, tie: false, winner: false });
   const done = useRef(onDone);
@@ -81,11 +85,11 @@ export function FirstDraw({ draws, starter, onDone }: { draws: Draw[]; starter: 
       <div className="w-[90vw] max-w-md rounded-xl bg-white p-6 text-center shadow-xl">
         <h2 className="mb-5 text-lg font-extrabold sm:text-xl">{t('drawTitle')}</h2>
         <div className="mb-5 flex justify-around">
-          {seat('p1', t('you'), view.you)}
-          {seat('p2', t('bot'), view.bot)}
+          {seat('p1', youName ?? t('you'), view.you)}
+          {seat('p2', oppName ?? t('bot'), view.bot)}
         </div>
         <p className="min-h-6 font-semibold text-slate-700">
-          {view.tie ? t('drawTie') : view.winner ? (starter === 'p1' ? t('drawYouFirst') : t('drawBotFirst')) : ''}
+          {view.tie ? t('drawTie') : view.winner ? (starter === 'p1' ? t('drawYouFirst') : oppName ? t('drawFirst', { name: oppName }) : t('drawBotFirst')) : ''}
         </p>
       </div>
     </div>
