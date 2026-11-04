@@ -36,6 +36,29 @@ GitHub Pages cannot host the server: it serves static files only, with no proces
 - Restrict WebSocket upgrades to the Pages origin (`https://westphalenpablo.github.io`) via an `Origin` check.
 - The Pages build needs the server URL at build time (a Vite env var), so `docs/github-pages.md` will need an update when this lands.
 
+## One repo, two hosts
+
+Pages and Render both deploy from this same repo and know nothing about each other.
+
+- **Pages** keeps deploying the client through `.github/workflows/pages.yml` on pushes to `master`, as in `github-pages.md`.
+- **Render** watches the same repo and branch, and builds and runs `packages/server`.
+
+Monorepo details:
+
+- **Leave Render's Root Directory empty (repo root).** The server imports `@tatp/game` through the pnpm workspace, so the build needs the whole workspace. A root of `packages/server` would break that resolution.
+- **Use Build Filters** so client-only commits do not redeploy the server (a redeploy drops live tables, since they are in memory). Included paths: `packages/server/**`, `packages/game/**`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`. Confirm the exact filter syntax in Render's docs when setting it up.
+- **Optional `paths:` filter on `pages.yml`** so server-only commits do not rebuild the client. Harmless either way. `packages/game` changes must still rebuild both.
+- **Prefer a `render.yaml` Blueprint** at the repo root, declaring the service (build, start, build filters, plan) as code instead of dashboard clicks. Write it when `packages/server` exists, since the commands are placeholders until then.
+- Render needs the GitHub app installed on the repo. Pages from a workflow works on public repos; a private repo needs a paid GitHub plan.
+
+The only coupling is the server URL (client build) and the Pages origin (server Origin check), both listed above.
+
+### Alternative considered: Render serves the client too
+
+The Node server could also serve `packages/client/dist` from the same Web Service. Gains: same origin (no CORS, no Origin allowlist, no server-URL env var, relative `/ws`), one deploy so client and server cannot drift. Costs: every client change restarts the server and drops live tables (Build Filters cannot help, the client is part of the service); no CDN for the client; a paid instance serves static traffic; the working Pages setup is retired or duplicated. A Render Static Site (free, CDN, independent deploys) was also considered, but it is still two origins, so it adds little over Pages.
+
+**Decision: keep GitHub Pages for the client.** Revisit if tables gain persistence and reconnect handling, which would remove the main objection to serving both from Render.
+
 ## Planned order
 
 1. Local echo server with `ws`, to settle the plumbing.
