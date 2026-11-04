@@ -5,13 +5,13 @@
   "players": [
     {
       "id": "p1",
-      "name": "Aur\u00e9lien",
+      "name": "Aurélien",
       "avatar": "green_pawn",
       "color": "#10B981"
     },
     {
       "id": "p2",
-      "name": "R\u00e9gis",
+      "name": "Régis",
       "avatar": "red_pawn",
       "color": "#EF4444"
     }
@@ -363,13 +363,24 @@
             "3S"
           ],
           "points": 250
+        },
+        {
+          "line": "diag_1",
+          "type": "STRAIGHT_FLUSH",
+          "cards": [
+            "3S",
+            "AS",
+            "2S"
+          ],
+          "points": 1500
         }
       ],
-      "score_delta": 250,
+      "score_delta": 1750,
       "running_scores": {
         "p1": 700,
-        "p2": 1200
-      }
+        "p2": 2700
+      },
+      "correction": "Frame 041 shows Régis at 2,700: the 3S-AS-2S straight flush scored when the Joker was placed, not at turn 13."
     },
     {
       "turn_index": 10,
@@ -405,7 +416,7 @@
       "score_delta": 250,
       "running_scores": {
         "p1": 950,
-        "p2": 1200
+        "p2": 2700
       }
     },
     {
@@ -432,7 +443,7 @@
       "score_delta": 0,
       "running_scores": {
         "p1": 950,
-        "p2": 1200
+        "p2": 2700
       }
     },
     {
@@ -479,7 +490,7 @@
       "score_delta": 1400,
       "running_scores": {
         "p1": 2350,
-        "p2": 1200
+        "p2": 2700
       }
     },
     {
@@ -511,23 +522,14 @@
             "KC"
           ],
           "points": 250
-        },
-        {
-          "line": "diag_1",
-          "type": "STRAIGHT_FLUSH",
-          "cards": [
-            "3S",
-            "AS",
-            "2S"
-          ],
-          "points": 1500
         }
       ],
-      "score_delta": 1750,
+      "score_delta": 250,
       "running_scores": {
         "p1": 2350,
         "p2": 2950
-      }
+      },
+      "correction": "Straight flush moved to turn 9 (see frame 041); only the K-K pair is new here."
     },
     {
       "turn_index": 14,
