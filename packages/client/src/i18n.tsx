@@ -29,6 +29,19 @@ const en = {
   tut3Title: 'Hands and points', tut3Body: 'A line scores its best hand. A pair counts as soon as two cards match, even with the third cell empty. Ace works low or high.',
   tut4Title: 'Joker and Robber', tut4Body: 'The Joker becomes any card you choose. The Robber steals a card from your opponent, and the victim places two cards next turn.',
   tut5Title: 'Who starts?', tut5Body: 'Each side draws a card first: the higher card plays first. You can reopen this guide any time with the ? button.',
+  menuTitle: 'How do you want to play?', playBot: 'Play vs bot', createRoom: 'Create a room to play a friend',
+  nameTitle: 'What should we call you?', nameLabel: 'Your name', nameHint: 'Your opponent will see this name.', nameGo: 'Continue', back2: 'Back',
+  roomTitle: 'Invite your friend', roomLink: 'Room link', roomShareText: 'Join me for a game of Tic-a-Tac Poker!',
+  copy: 'Copy', copied: 'Copied!', share: 'Share', waitingFriend: 'Waiting for your friend…', roomShareHint: 'Send this link. The game starts as soon as they open it.',
+  connecting: 'Connecting…', reconnecting: 'Connection lost. Reconnecting…', oppOffline: 'Waiting for {name} to reconnect…',
+  opponentTurn: "{name}'s turn…", oppWins: '{name} wins', drawFirst: '{name} plays first',
+  noteRobbedBy: '🦹 {name} robbed your card! You place 2 cards next turn.', noteJokerBy: '🃏 {name} played a Joker.', noteRejected: 'That move was not accepted.',
+  roomNotFound: 'Room not found', roomNotFoundBody: 'This link is invalid, or the room has expired.',
+  roomFull: 'Room is full', roomFullBody: 'Two players are already in this room.',
+  serverFull: 'Server is busy', serverFullBody: 'Too many rooms are open right now. Try again in a few minutes.',
+  roomClosed: 'Room closed', roomClosedBody: 'The other player left the room.',
+  backToMenu: 'Back to menu', leaveRoom: 'Leave room', leaveConfirm: 'Leave this room? The game ends for both players.',
+  rematchWaiting: 'Waiting for {name}…', rematchAsked: '{name} wants a rematch',
 };
 export type Key = keyof typeof en;
 
@@ -61,6 +74,19 @@ const ptBR: Record<Key, string> = {
   tut3Title: 'Mãos e pontos', tut3Body: 'Cada linha vale sua melhor mão. Um par já conta com duas cartas iguais, mesmo com a terceira célula vazia. O Ás vale baixo ou alto.',
   tut4Title: 'Coringa e Ladrão', tut4Body: 'O Coringa vira a carta que você escolher. O Ladrão rouba uma carta do oponente, e a vítima joga duas cartas na vez seguinte.',
   tut5Title: 'Quem começa?', tut5Body: 'Cada lado sorteia uma carta antes: a mais alta joga primeiro. Você pode rever este guia a qualquer momento no botão ?.',
+  menuTitle: 'Como você quer jogar?', playBot: 'Jogar contra o bot', createRoom: 'Criar uma sala para jogar com um amigo',
+  nameTitle: 'Como devemos te chamar?', nameLabel: 'Seu nome', nameHint: 'Seu oponente verá este nome.', nameGo: 'Continuar', back2: 'Voltar',
+  roomTitle: 'Convide seu amigo', roomLink: 'Link da sala', roomShareText: 'Venha jogar Tic-a-Tac Poker comigo!',
+  copy: 'Copiar', copied: 'Copiado!', share: 'Compartilhar', waitingFriend: 'Aguardando seu amigo…', roomShareHint: 'Envie este link. O jogo começa assim que ele abrir.',
+  connecting: 'Conectando…', reconnecting: 'Conexão perdida. Reconectando…', oppOffline: 'Aguardando {name} reconectar…',
+  opponentTurn: 'Vez de {name}…', oppWins: '{name} venceu', drawFirst: '{name} joga primeiro',
+  noteRobbedBy: '🦹 {name} roubou sua carta! Você joga 2 cartas na próxima vez.', noteJokerBy: '🃏 {name} jogou um Coringa.', noteRejected: 'Essa jogada não foi aceita.',
+  roomNotFound: 'Sala não encontrada', roomNotFoundBody: 'Este link é inválido ou a sala expirou.',
+  roomFull: 'Sala cheia', roomFullBody: 'Já há dois jogadores nesta sala.',
+  serverFull: 'Servidor ocupado', serverFullBody: 'Há salas demais abertas agora. Tente novamente em alguns minutos.',
+  roomClosed: 'Sala encerrada', roomClosedBody: 'O outro jogador saiu da sala.',
+  backToMenu: 'Voltar ao menu', leaveRoom: 'Sair da sala', leaveConfirm: 'Sair desta sala? O jogo termina para os dois jogadores.',
+  rematchWaiting: 'Aguardando {name}…', rematchAsked: '{name} quer a revanche',
 };
 
 export const LANGS = { en: 'English', 'pt-BR': 'Português (Brasil)' } as const;
@@ -78,7 +104,9 @@ function detect(): Lang {
   return 'en';
 }
 
-type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: Key) => string };
+/** `{name}`-style placeholders in a string are filled from `vars`. */
+export type Vars = Record<string, string | number>;
+type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: Key, vars?: Vars) => string };
 const I18nContext = createContext<Ctx>(null!);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -88,7 +116,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem(STORAGE_KEY, l); } catch { /* ignore */ }
   };
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
-  const value = useMemo<Ctx>(() => ({ lang, setLang, t: (k) => DICTS[lang][k] }), [lang]);
+  const value = useMemo<Ctx>(() => ({ lang, setLang, t: (k, vars) => (vars ? DICTS[lang][k].replace(/\{(\w+)\}/g, (m, v: string) => String(vars[v] ?? m)) : DICTS[lang][k]) }), [lang]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 

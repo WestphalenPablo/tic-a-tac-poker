@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Tic-a-Tac Poker</title>
+    <!--
+      GitHub Pages has no SPA fallback, so /tic-a-tac-poker/room/{id} lands here. Bounce to the app root with the
+      path in the query string; the inline script in index.html restores the real path before React starts.
+      The base path below must match `base` in vite.config.ts.
+    -->
+    <script>
+      (function (l) {
+        var base = '/tic-a-tac-poker/';
+        var rest = l.pathname.indexOf(base) === 0 ? l.pathname.slice(base.length) : '';
+        l.replace(l.origin + base + '?/' + rest.replace(/&/g, '~and~') + (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') + l.hash);
+      })(window.location);
+    </script>
+  </head>
+  <body></body>
+</html>
