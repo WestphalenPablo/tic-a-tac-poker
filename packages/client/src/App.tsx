@@ -17,6 +17,7 @@ import { getRoomId, roomUrl, showHomeInUrl, showRoomInUrl } from './route';
 import { playClip, setSoundMode, useSoundBusy, useSoundMode } from './sounds';
 import { playFlip } from './sfx';
 import { markTutorialSeen, seenTutorial, Tutorial } from './Tutorial';
+import { padStep, setPadMode } from './padNav';
 import { useGamepad } from './useGamepad';
 import { useHandSounds } from './useHandSounds';
 import { useHandReveal } from './useHandReveal';
@@ -236,10 +237,34 @@ export function App() {
     const empty = game.grids[HUMAN].findIndex((x) => !x);
     setCursor(sel && empty >= 0 ? { zone: 'mine', idx: empty } : { zone: 'pool', idx: 0 });
   }, [canTheirs, cursor.zone, sel, game]);
+  const [chrome, setChrome] = useState(false); // pad focus is on the header / banners instead of the table
   useGamepad((a) => {
-    if (help || intro || joker !== null || !inGame) return; // opening draw is not interactive; JokerPicker handles its own input
-    if (res0) { if (a === 'a') (online ? room.rematch() : start()); return; }
+    if (help || joker !== null) return; // Tutorial and JokerPicker handle their own input
+    if (intro && inGame) return; // opening draw is not interactive
     setPadUsed(true);
+    setPadMode(true);
+    // Modals (menu, name, room, notices, game over, what's new): pad moves DOM focus inside the topmost one.
+    const scopes = [...document.querySelectorAll('[data-pad-scope]')];
+    const top = scopes[scopes.length - 1];
+    if (top) {
+      const r = padStep([top], a);
+      if (r === 'cancel') top.querySelector<HTMLElement>('[data-pad-cancel]')?.click();
+      return;
+    }
+    if (!inGame) return;
+    // Header and banners: reached by pushing up from the top row, left with B or by pushing down past the last one.
+    if (chrome) {
+      const r = padStep([...document.querySelectorAll('[data-pad-chrome]')], a);
+      if (r === 'cancel' || r === 'edge' && a === 'down' || r === 'activated' && !(document.activeElement instanceof HTMLSelectElement)) {
+        setChrome(false);
+        (document.activeElement as HTMLElement | null)?.blur();
+      }
+      return;
+    }
+    if (a === 'up' && (cursor.zone === 'pool' ? cursor.idx === 0 : cursor.idx < 3)) {
+      if (padStep([...document.querySelectorAll('[data-pad-chrome]')], 'up') !== 'edge') setChrome(true);
+      return;
+    }
     if (a === 'b') { setSel(null); return; }
     if (a === 'a') {
       if (cursor.zone === 'pool') onPool(cursor.idx);
@@ -249,7 +274,7 @@ export function App() {
     }
     setCursor((c) => moveCursor(c, a, game.pool.length, canTheirs));
   });
-  const focusAt = (zone: Zone, i: number) => padUsed && cursor.zone === zone && cursor.idx === i;
+  const focusAt = (zone: Zone, i: number) => padUsed && !chrome && cursor.zone === zone && cursor.idx === i;
 
   // Leaving a room closes it for both players. Nothing of the online session survives the menu.
   const leaveOnline = () => {
@@ -277,8 +302,8 @@ export function App() {
     : { title: t('roomNotFound'), body: t('roomNotFoundBody') };
 
   return (
-    <div className="mx-auto max-w-4xl p-2 sm:p-4" onPointerDown={() => setPadUsed(false)}>
-      <header className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gradient-to-r from-msn to-sky-400 px-3 py-2 text-white shadow sm:mb-4 sm:px-4">
+    <div className="mx-auto max-w-4xl p-2 sm:p-4" onPointerDown={() => { setPadUsed(false); setPadMode(false); setChrome(false); }}>
+      <header data-pad-chrome className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gradient-to-r from-msn to-sky-400 px-3 py-2 text-white shadow sm:mb-4 sm:px-4">
         <h1 className="text-lg font-extrabold sm:text-xl tracking-tight">{t('title')}</h1>
         <div className="flex flex-wrap gap-2 text-xs sm:gap-3 sm:text-sm">
           {!online && (
@@ -342,7 +367,7 @@ export function App() {
       {joker !== null && sel && <JokerPicker onCancel={() => setJoker(null)} onConfirm={(as) => play(sel.slot, joker, as)} />}
 
       {res && inGame && (
-        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/40">
+        <div data-pad-scope className="fixed inset-0 z-10 flex items-center justify-center bg-black/40">
           <div className="w-[90vw] max-w-sm rounded-xl bg-white p-6 text-center shadow-xl">
             <h2 className="mb-1 text-2xl font-extrabold">{res.winner === 'draw' ? t('draw') : res.winner === HUMAN ? t('youWin') : online ? t('oppWins', { name: oppName }) : t('botWins')}</h2>
             <p className="mb-4 text-sm text-slate-500">{t('summary')}</p>
@@ -357,14 +382,14 @@ export function App() {
               <>
                 {room.info?.rematch.opponent && !room.info.rematch.you && <p className="mb-2 text-sm text-slate-600">{t('rematchAsked', { name: oppName })}</p>}
                 <div className="flex justify-center gap-2">
-                  <button className="rounded px-4 py-2 text-slate-600 hover:bg-slate-100" onClick={toMenu}>{t('leaveRoom')}</button>
-                  <button className="rounded bg-msn px-5 py-2 font-semibold text-white hover:bg-sky-700 disabled:opacity-60" disabled={room.info?.rematch.you} onClick={room.rematch}>
+                  <button data-pad-cancel className="rounded px-4 py-2 text-slate-600 hover:bg-slate-100" onClick={toMenu}>{t('leaveRoom')}</button>
+                  <button className="rounded bg-msn px-5 py-2 font-semibold text-white hover:bg-sky-700 disabled:opacity-60" disabled={room.info?.rematch.you} onClick={room.rematch} data-pad-default>
                     {room.info?.rematch.you ? t('rematchWaiting', { name: oppName }) : t('playAgain')}
                   </button>
                 </div>
               </>
             ) : (
-              <button className="rounded bg-msn px-5 py-2 font-semibold text-white hover:bg-sky-700" onClick={() => start()}>{t('playAgain')}</button>
+              <button data-pad-default className="rounded bg-msn px-5 py-2 font-semibold text-white hover:bg-sky-700" onClick={() => start()}>{t('playAgain')}</button>
             )}
           </div>
         </div>

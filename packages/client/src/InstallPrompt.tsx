@@ -18,7 +18,7 @@ export function InstallBanner() {
   useEffect(() => { const id = setTimeout(() => setReady(true), 4000); return () => clearTimeout(id); }, []);
   if (kind === 'none' || !banner || !ready) return null;
   return (
-    <div role="dialog" aria-label={t('install')} className="fixed inset-x-2 top-2 z-10 mx-auto flex max-w-md items-center gap-3 rounded-xl bg-slate-900 px-4 py-3 text-sm text-white shadow-lg">
+    <div data-pad-chrome role="dialog" aria-label={t('install')} className="fixed inset-x-2 top-2 z-10 mx-auto flex max-w-md items-center gap-3 rounded-xl bg-slate-900 px-4 py-3 text-sm text-white shadow-lg">
       <span className="flex-1">{kind === 'ios' ? t('installIos') : t('installPrompt')}</span>
       {kind === 'native' && <button className="rounded bg-msn px-3 py-1 font-semibold hover:opacity-90" onClick={() => void requestInstall()}>{t('install')}</button>}
       <button aria-label={t('notNow')} title={t('notNow')} className="px-1 text-lg leading-none text-white/70 hover:text-white" onClick={dismissInstall}>×</button>

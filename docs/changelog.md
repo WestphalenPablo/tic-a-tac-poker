@@ -17,7 +17,7 @@ _Superseded: drag and drop now uses Pointer Events and also works on touch. The 
 - New `useGamepad` hook (`src/useGamepad.ts`) polls connected pads once per animation frame and emits `up/down/left/right/a/b`. Standard mapping: A=0, B=1, d-pad=12-15, left stick with a 0.6 deadzone. Directions repeat while held (350 ms delay, then 130 ms); A/B fire once per press.
 - A cursor (magenta outline) moves across your board, the pool column and the bot's board. A selects/places, B cancels the current selection. The cursor appears only after pad input and hides on pointer use.
 - Joker picker: left/right = rank, up/down = suit, A = confirm, B = cancel.
-- Game-over dialog: A starts a new game.
+- Game-over dialog: A starts a new game. (Menus, header and banners: see [gamepad-menus.md](gamepad-menus.md).)
 - The bot's grid is reachable only while choosing which card to rob (Robber selected, no target chosen yet). Otherwise the cursor cannot enter it. If the cursor is on the bot's grid when that stops being true, it moves to your first empty cell (after a target is picked) or to the first pool slot (on cancel or end of turn).
 
 ## Responsive layout

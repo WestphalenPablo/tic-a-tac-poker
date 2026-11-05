@@ -19,6 +19,7 @@ Working notes on what has been built and why. The master doc for rules and statu
 | [drag-drop.md](drag-drop.md) | Pointer-event drag and drop (mouse + touch): ghost, hover feedback, tap vs drag, what is verified |
 | [update-banner.md](update-banner.md) | "New version available" banner for tabs left open across a Pages deploy: version.json polling, View modal with commit-based release notes |
 | [time-limit.md](time-limit.md) | 30 s turn timer: auto-play rule, pause decisions, server clock + grace, client countdown, verification |
+| [gamepad-menus.md](gamepad-menus.md) | Gamepad reaches the header, modals, banners and game-over dialog (DOM-focus navigation) |
 | [multiplayer-server.md](multiplayer-server.md) | Decision: Node + `ws` server on Render, client stays on Pages (same repo, two hosts); open questions |
 
 ## Convention

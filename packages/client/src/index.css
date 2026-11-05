@@ -22,3 +22,6 @@ body { @apply bg-slate-100 text-slate-800 antialiased; font-family: 'Segoe UI', 
   100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 @media (prefers-reduced-motion: reduce) { .hand-reveal { animation: none; } }
+
+/* Focus ring while a controller drives the menus, header and banners (set by padNav.setPadMode). */
+html[data-pad] :is(button, select, input, a):focus { outline: 3px solid #d946ef; outline-offset: 2px; }

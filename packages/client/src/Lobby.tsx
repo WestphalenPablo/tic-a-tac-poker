@@ -16,7 +16,7 @@ const ghost = 'rounded px-3 py-2 text-slate-600 hover:bg-slate-100';
 
 function Modal({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/40">
+    <div data-pad-scope className="fixed inset-0 z-20 flex items-center justify-center bg-black/40">
       <div role="dialog" aria-modal="true" aria-label={label} className="w-[90vw] max-w-sm rounded-xl bg-white p-5 shadow-xl">
         {children}
       </div>
@@ -31,7 +31,7 @@ export function MenuModal({ onBot, onRoom }: { onBot: () => void; onRoom?: () =>
     <Modal label={t('menuTitle')}>
       <h2 className="mb-4 text-center text-lg font-bold">{t('menuTitle')}</h2>
       <div className="flex flex-col gap-2">
-        <button className={btn} onClick={onBot} autoFocus>{t('playBot')}</button>
+        <button className={btn} onClick={onBot} autoFocus data-pad-default>{t('playBot')}</button>
         {onRoom && <button className={btn} onClick={onRoom}>{t('createRoom')}</button>}
       </div>
     </Modal>
@@ -53,7 +53,7 @@ export function NamePrompt({ onSubmit, onBack }: { onSubmit: (name: string) => v
           autoFocus autoComplete="nickname" onChange={(e) => setName(e.target.value)} />
         <p className="mb-4 text-xs text-slate-500">{t('nameHint')}</p>
         <div className="flex justify-between gap-2">
-          <button type="button" className={ghost} onClick={onBack}>{t('back2')}</button>
+          <button type="button" data-pad-cancel className={ghost} onClick={onBack}>{t('back2')}</button>
           <button type="submit" className={btn} disabled={!clean}>{t('nameGo')}</button>
         </div>
       </form>
@@ -95,7 +95,7 @@ export function RoomModal({ url, offline, onLeave }: { url: string; offline: boo
         <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-msn" />
         {offline ? t('reconnecting') : t('waitingFriend')}
       </p>
-      <div className="text-right"><button className={ghost} onClick={onLeave}>{t('cancel')}</button></div>
+      <div className="text-right"><button data-pad-cancel className={ghost} onClick={onLeave}>{t('cancel')}</button></div>
     </Modal>
   );
 }
@@ -106,7 +106,7 @@ export function NoticeModal({ title, body, action, onAction }: { title: string; 
     <Modal label={title}>
       <h2 className="mb-2 text-lg font-bold">{title}</h2>
       {body && <p className="mb-4 text-sm text-slate-700">{body}</p>}
-      <div className="text-right"><button className={btn} onClick={onAction} autoFocus>{action}</button></div>
+      <div className="text-right"><button className={btn} onClick={onAction} autoFocus data-pad-default>{action}</button></div>
     </Modal>
   );
 }
